@@ -37,6 +37,12 @@ TEST(cstring, replace) {
     ASSERT_EQ(str.replace("Hello", "Hi"), "Hi, World!");
 }
 
+TEST(cstring, substring) {
+    shade::cstring str = "Hello, World!";
+    shade::cstring result = str.substring(2, 5);
+    ASSERT_EQ(result, "llo");
+}
+
 TEST(cstring, replace_with_nothing) {
     shade::cstring str = "Hello, World!";
     ASSERT_EQ(str.replace("Hello, ", shade::cstring::empty()), "World!");

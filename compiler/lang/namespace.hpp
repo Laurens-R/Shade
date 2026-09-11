@@ -40,7 +40,7 @@ namespace shade
             final_parent_path = strip_global_prefix(final_parent_path);
 
             if (!final_parent_path.ends_with(spelling::modules::module_seperator)) {
-                final_parent_path = final_parent_path +  spelling::modules::module_seperator;
+                final_parent_path = final_parent_path + spelling::modules::module_seperator;
             }
             return full_path.replace(final_parent_path, cstring::empty());
         }

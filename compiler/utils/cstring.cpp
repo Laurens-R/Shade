@@ -307,7 +307,7 @@ namespace shade {
     }
 
     auto cstring::substring(size_t start, size_t end) const -> cstring {
-        return cstring(_str.get() + start, end);
+        return cstring(_str.get() + start, end - start);
     }
 
     auto cstring::to_uppper() const -> cstring {
