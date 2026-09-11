@@ -129,6 +129,8 @@ namespace shade {
         /// @brief Whether @p str occurs as a substring.
         [[nodiscard]] auto contains(const cstring& str) const -> bool;
 
+        [[nodiscard]] auto begins_with(const cstring& str) const -> bool;
+
         /// @brief An upper-cased copy.
         [[nodiscard]] auto to_uppper() const -> cstring;
 
@@ -139,13 +141,13 @@ namespace shade {
          * @brief A copy with every occurrence of @p oldstr replaced by @p newstr.
          * @return The empty string if @p oldstr is empty.
          */
-        [[nodiscard]] auto replace(const cstring& oldstr, const cstring& newstr) -> cstring;
+        [[nodiscard]] auto replace(const cstring& oldstr, const cstring& newstr) const -> cstring;
 
         /**
          * @brief Split on @p splitstr.
          * @return The pieces; the whole string as a single element if @p splitstr is empty.
          */
-        [[nodiscard]] auto split(const cstring& splitstr) -> std::vector<cstring>;
+        [[nodiscard]] auto split(const cstring& splitstr) const -> std::vector<cstring>;
 
         /// @brief Whether the text is a valid signed integer literal (optional leading `-`).
         [[nodiscard]] auto is_signed_int() const -> bool;

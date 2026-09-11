@@ -35,4 +35,5 @@ add_executable(shade main.cpp
         utils/ctmap.hpp
         utils/exceptions.hpp
         meta/module.cpp
-        meta/module.hpp)
+        meta/module.hpp
+        lang/namespace.hpp)

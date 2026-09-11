@@ -8,7 +8,8 @@
 #include <vector>
 #include <unordered_map>
 
-#include "type_information.h"
+#include "module_definition.hpp"
+#include "../lang/namespace.hpp"
 
 namespace shade
 {
@@ -18,7 +19,13 @@ namespace shade
         std::unordered_map<const char*, size_t> _registered_type_mapping;
     public:
 
+        module_definition global;
 
+        type_index()
+        {
+            global.full_path = namespace_path::get_global_path();
+            global.name = "::";
+        }
     };
 }
 

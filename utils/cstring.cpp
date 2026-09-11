@@ -281,6 +281,19 @@ namespace shade {
         return std::strstr(_str.get(), str.to_c_string()) != nullptr;
     }
 
+    auto cstring::begins_with(const cstring& str) const -> bool
+    {
+        if (str.length() == 0 || length() == 0) return false;
+        if (str.length() > length()) return false;
+
+        for (size_t i = 0; i < str.length(); ++i)
+        {
+            if (str.at(i) != at(i)) return false;
+        }
+
+        return true;
+    }
+
     auto cstring::to_uppper() const -> cstring {
         cstring result(_currentOffset);
         for (size_t i = 0; i < _currentOffset; ++i) {
@@ -297,7 +310,7 @@ namespace shade {
         return result;
     }
 
-    auto cstring::replace(const cstring& oldstr, const cstring& newstr) -> cstring {
+    auto cstring::replace(const cstring& oldstr, const cstring& newstr) const -> cstring {
         if (oldstr.is_empty()) return cstring::empty();
 
         if (*this == oldstr) {
@@ -325,7 +338,7 @@ namespace shade {
         return result;
     }
 
-    auto cstring::split(const cstring& splitstr) -> std::vector<cstring> {
+    auto cstring::split(const cstring& splitstr) const -> std::vector<cstring> {
         std::vector<cstring> result;
         if (splitstr.is_empty()) {
             result.push_back(*this);
