@@ -8,6 +8,9 @@
 #include <expected>
 #include <vector>
 
+#include "function.h"
+#include "metadata.h"
+
 #include "../utils/cstring.hpp"
 #include "../vendor/xxhash/xxhash.hpp"
 
@@ -49,13 +52,17 @@ namespace shade {
         incomplete_type
     };
 
-    struct type_information {
+    class ast_node;
+
+    struct type_information final : public metadata {
         std::vector<cstring>               generics;
         std::vector<type_field_definition> fields;
+        std::vector<function>              methods;
         cstring                            name             = cstring::empty();
         cstring                            module_path      = cstring::empty();
         primitive_types                    primitive_type   = primitive_types::unknown;
         reference_type                     reference_type   = reference_type::none;
+        ast_node*                          related_node     = nullptr;
         uint64_t                           fixed_array_size = 0;
         uint8_t                            alignment        = sizeof(uintptr_t);
         bool                               is_primitive     = false;
@@ -66,16 +73,23 @@ namespace shade {
         bool                               is_array         = false;
         bool                               is_dynamic_array = false;
 
+        ~type_information() = default;
+
         [[nodiscard]] size_t   get_size() const;
         [[nodiscard]] cstring  get_full_path() const;
         [[nodiscard]] uint64_t get_hash() const;
 
         void calculate_offsets();
+        [[nodiscard]] bool are_fields_valid() const;
+
         void add_field(const cstring& field_name, type_information* type);
-        bool are_fields_valid() const;
+        void add_method(const cstring& method_name, ast_node * related_node, type_information* return_type, const std::vector<function_argument>& arguments);
 
         std::expected<type_information, generics_error> monomorphize(const std::vector<type_information*> types);
         static type_information                         get_for_primitive_type(primitive_types primitive_type);
+        static type_information                         create_struct(const cstring& name, ast_node* related_node, size_t alignment = sizeof(uintptr_t));
+
+        metadata_type get_type() override;
     };
 }
 

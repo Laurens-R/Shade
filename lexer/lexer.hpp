@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "../utils/cstring.hpp"
+#include "../pipeline/compilecontext.h"
 
 namespace shade {
     constexpr std::uint32_t CLAW_TOKENIZERSTATE_NONE           = 0b00000;
@@ -91,9 +92,9 @@ namespace shade {
 
         cstring       _source;
         std::uint32_t _state = CLAW_TOKENIZERSTATE_NONE;
-
+        compile_context & _context;
     public:
-        explicit lexer(const cstring& source);
+        explicit lexer(const cstring& source, compile_context & context);
 
         /// @brief Tokenize the source into a flat token stream (comments discarded).
         auto tokenize() -> std::vector<language_token>;

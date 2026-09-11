@@ -155,6 +155,21 @@ namespace shade {
         return *this;
     }
 
+    auto cstring::operator=(const std::string_view &other) -> cstring&
+    {
+        auto len = other.length();
+        alloc(len);
+        std::memset(_str.get(), 0, _capacity);
+
+#ifndef PLATFORM_WINDOWS
+        std::strcpy(_str.get(), other.data());
+#else
+        strncpy_s(_str.get(), _capacity, other.data(), _capacity - 1);
+#endif
+        _currentOffset = len;
+        return *this;
+    }
+
     auto cstring::operator+(const cstring& other) const -> cstring {
         cstring result(*this);
         result.append(other);
@@ -249,6 +264,11 @@ namespace shade {
     }
 
     auto cstring::to_std_string() const -> std::string {
+        return {_str.get()};
+    }
+
+    auto cstring::to_std_string_view() const -> std::string_view
+    {
         return {_str.get()};
     }
 

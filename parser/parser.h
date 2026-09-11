@@ -10,13 +10,17 @@
 
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
-
+#include "../pipeline/compilecontext.h"
 
 namespace shade {
     class parser {
+    private:
+        compile_context & _context;
     public:
-        static void try_scope_captures(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
-        static void parse(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
+        parser(compile_context & context);
+
+        void try_scope_captures(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
+        void parse(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
     };
 
 } // shade

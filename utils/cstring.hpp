@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace shade {
@@ -58,6 +59,8 @@ namespace shade {
         auto operator=(const cstring& other) -> cstring&;
 
         auto operator=(const char* other) -> cstring&;
+
+        auto operator=(const std::string_view & other) -> cstring&;
 
         /// @brief Concatenate, returning a new string.
         auto operator+(const cstring& other) const -> cstring;
@@ -117,6 +120,8 @@ namespace shade {
 
         /// @brief Copy the contents out as a std::string.
         [[nodiscard]] auto to_std_string() const -> std::string;
+
+        [[nodiscard]] auto to_std_string_view() const -> std::string_view;
 
         /// @brief The backing buffer pointer; valid only until the next mutation.
         [[nodiscard]] auto to_c_string() const -> const char*;

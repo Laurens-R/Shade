@@ -8,21 +8,27 @@
 #include <stdexcept>
 #include "../pipeline/compilecontext.h"
 
-namespace shade {
+namespace shade
+{
     class compiler_exception : public std::runtime_error
     {
         std::string message;
+
     public:
-        compiler_exception(std::string message) {
-            this->message = message;
+        compiler_exception() : std::runtime_error("Unexpected compiler exception occurred.")
+        {
         }
+
+        explicit compiler_exception(const std::string& message) : std::runtime_error(message)
+        {
+        }
+
+        ~compiler_exception() noexcept override = default;
 
         [[nodiscard]] const char* what() const override
         {
             return message.c_str();
         }
-
-        ~compiler_exception() noexcept override;
     };
 }
 

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../utils/cstring.hpp"
+#include "../meta/type_index.h"
 
 namespace shade {
     struct diagnostic {
@@ -18,17 +19,20 @@ namespace shade {
 
     class compile_context {
     private:
-        std::vector<diagnostic> errors;
-        std::vector<diagnostic> warnings;
-        std::vector<diagnostic> information;
-        std::vector<diagnostic> debug_messages;
-        std::vector<cstring> lookup_paths;
+        std::vector<diagnostic> _errors;
+        std::vector<diagnostic> _warnings;
+        std::vector<diagnostic> _information;
+        std::vector<diagnostic> _debug_messages;
+        std::vector<cstring> _lookup_paths;
+
+        type_index _types;
     public:
         const std::vector<diagnostic>& get_errors() const;
         const std::vector<diagnostic>& get_warnings() const;
         const std::vector<diagnostic>& get_information() const;
         const std::vector<diagnostic>& get_debug_messages() const;
         const std::vector<cstring>& get_lookup_paths() const;
+        type_index get_type_index() const;
 
         void log_error(const size_t line, const size_t column, const cstring & message);
         void log_warning(const size_t line, const size_t column, const cstring & message);

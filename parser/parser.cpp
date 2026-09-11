@@ -10,16 +10,21 @@
 namespace shade {
 
     struct capture_methods {
-        static range_capture module_range;
-        static range_capture struct_range;
-        static range_capture function_range;
-        static range_capture if_range;
-        static range_capture if_else_range;
-        static range_capture else_range;
-        static range_capture for_loop_range;
-        static range_capture while_loop_range;
+        range_capture module_range;
+        range_capture struct_range;
+        range_capture function_range;
+        range_capture if_range;
+        range_capture if_else_range;
+        range_capture else_range;
+        range_capture for_loop_range;
+        range_capture while_loop_range;
 
-        static void init() {
+        capture_methods()
+        {
+            init();
+        }
+
+        void init() {
             static bool are_ranges_initialized = false;
 
             if (are_ranges_initialized) {
@@ -61,10 +66,13 @@ namespace shade {
 
     static const capture_methods & get_capture_methods() {
         static capture_methods methods;
-        shade::capture_methods::init();
         return methods;
     }
-    static capture_methods capture_ranges;
+
+    parser::parser(compile_context& context)
+        : _context(context)
+    {
+    }
 
     void parser::try_scope_captures(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index) {
         const auto & capture = get_capture_methods();
