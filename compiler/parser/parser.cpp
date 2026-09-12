@@ -23,7 +23,6 @@ namespace shade {
         range_capture raw_scope_range;
         range_capture statement_range;
 
-
         capture_methods()
         {
             init();
@@ -95,8 +94,7 @@ namespace shade {
     static size_t process_body_map(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> & results) {
         auto & capture_methods = get_capture_methods();
 
-        //we increment the current token index because the first token is the begin-body symbol.
-        auto current_token_index = from_token_index + 1;
+        auto current_token_index = from_token_index;
 
         while (current_token_index < to_token_index) {
             /*
@@ -110,7 +108,7 @@ namespace shade {
                     process_body_map(tokens, if_body.from_token_index + 1, if_body.to_token_index - 1, if_result.child_results);
                 }
                 results.push_back(if_result);
-                current_token_index = if_result.range_from_index + 1;
+                current_token_index = if_result.range_to_index + 1;
 
                 /*
                  * else-if and else are nested into if because they can only be used after an if.
@@ -125,7 +123,7 @@ namespace shade {
                     }
 
                     results.push_back(if_else_result);
-                    current_token_index = if_else_result.range_from_index + 1;
+                    current_token_index = if_else_result.range_to_index + 1;
                 }
 
                 auto else_result = capture_methods.else_range.try_capture(tokens, current_token_index, to_token_index);
@@ -137,7 +135,7 @@ namespace shade {
                     }
 
                     results.push_back(else_result);
-                    current_token_index = else_result.range_from_index + 1;
+                    current_token_index = else_result.range_to_index + 1;
                 }
 
                 continue;
@@ -155,7 +153,7 @@ namespace shade {
                 }
 
                 results.push_back(for_result);
-                current_token_index = for_result.range_from_index + 1;
+                current_token_index = for_result.range_to_index + 1;
 
                 continue;
             }
@@ -172,7 +170,7 @@ namespace shade {
                 }
 
                 results.push_back(while_result);
-                current_token_index = while_result.range_from_index + 1;
+                current_token_index = while_result.range_to_index + 1;
                 continue;
             }
 
@@ -182,7 +180,7 @@ namespace shade {
             auto statement_result = capture_methods.statement_range.try_capture(tokens, current_token_index, to_token_index);
             if (statement_result.matched) {
                 results.push_back(statement_result);
-                current_token_index = statement_result.range_from_index + 1;
+                current_token_index = statement_result.range_to_index + 1;
                 continue;
             }
         }
@@ -208,7 +206,7 @@ namespace shade {
                     process_body_map(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
                 }
                 results.push_back(function_result);
-                current_token_index = function_result.range_from_index + 1;
+                current_token_index = function_result.range_to_index + 1;
                 continue;
             }
 

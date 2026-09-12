@@ -108,7 +108,7 @@ add_executable(tests tests/namespace_tests.cpp
         tests/cstring_tests.cpp
         tests/lexer_tests.cpp
         tests/tests_common.hpp
-        tests/test_parser.cpp
+        tests/parser_tests.cpp
         tests/range_capture_test.cpp)
 target_include_directories(tests PUBLIC compiler)
 target_link_libraries(tests PRIVATE lib_shade)
