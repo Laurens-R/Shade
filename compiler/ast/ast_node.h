@@ -21,10 +21,13 @@ namespace shade
     struct function;
 
     enum class ast_node_types {
-        module,
-        function,
-        structure,
-        variable,
+        module_definition,
+        function_definition,
+        structure_definition,
+        variable_definition,
+        variable_reference,
+        constant_value,
+        constant_reference,
         operation,
         function_call,
         extern_function_call,
