@@ -20,9 +20,21 @@ namespace shade
     struct type_information;
     struct function;
 
+    enum class ast_node_types {
+        module,
+        function,
+        structure,
+        variable,
+        operation,
+        function_call,
+        extern_function_call,
+        extern_c_function_call
+    };
+
     struct ast_node
     {
         ast_node * parent;
+        ast_node_types type;
         std::vector<std::shared_ptr<ast_node>> children;
         std::shared_ptr<metadata> metadata;
         language_token token;
@@ -30,9 +42,6 @@ namespace shade
         ast_node * create_child(ast_node * parent);
         std::optional<type_information*> get_type_metadata(ast_node * parent);
         std::optional<function*> get_function_metadata(ast_node * parent);
-
-
-
     };
 } // shade
 

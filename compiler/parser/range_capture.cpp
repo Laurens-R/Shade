@@ -4,83 +4,282 @@
 
 #include "range_capture.h"
 
+#include <ranges>
+
 namespace shade {
 
-    range_capture& range_capture::if_start_with(const cstring & token) {
-        _starts_with = token;
+    void capture_results::reset() {
+        _captured_ranges.clear();
+        _captured_ranges_by_key.clear();
+    }
+
+    void capture_results::add_captured_range(size_t from, size_t to, const cstring& key) {
+        _captured_ranges.emplace_back(key, from, to);
+        _captured_ranges_by_key.insert_or_assign(key.to_c_string(), _captured_ranges.size() - 1);
+    }
+
+    std::optional<captured_range> capture_results::get_captured_range(const cstring& key) {
+        if (!_captured_ranges_by_key.contains(key.to_c_string())) {
+            return std::nullopt;
+        }
+        return _captured_ranges[_captured_ranges_by_key.at(key.to_c_string())];
+    }
+
+    range_capture& range_capture::match_and_capture_token(const cstring& token, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::match_single,
+            .match_tokens = {token},
+            .skip_count = 0,
+            .key = key
+        });
         return *this;
     }
 
-    range_capture& range_capture::then_capture_range(const cstring & from, const cstring & to, const range_type type) {
-        range_tokens t = {
-            .from = from, .to = to, .type = type
+    range_capture& range_capture::match_and_capture_any_token(const std::vector<cstring>& tokens, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::match_any,
+            .match_tokens = tokens,
+            .skip_count = 0,
+            .key = key
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::capture_tokens_by_count(size_t count, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::take_n,
+            .match_tokens = {},
+            .skip_count = count,
+            .key = key
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::if_next_token_present(const cstring& token) {
+        _parse_instructions.push_back({
+            .type = instruction_type::if_next_token_present,
+            .match_tokens = {token},
+            .skip_count = 0,
+            .key = cstring::empty()
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::skip_tokens_by(size_t count) {
+        _parse_instructions.push_back({
+            .type = instruction_type::skip_count,
+            .match_tokens = {},
+            .skip_count = count,
+            .key = cstring::empty()
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::skip_token_until(const cstring& token) {
+        _parse_instructions.push_back({
+            .type = instruction_type::skip_until,
+            .match_tokens = {token},
+            .skip_count = 0,
+            .key = cstring::empty()
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::capture_range(const cstring& from, const cstring& to, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::match_range,
+            .match_tokens = {from, to},
+            .skip_count = 0,
+            .key = key
+        });
+        return *this;
+    }
+
+    capture_results range_capture::try_capture(const std::vector<language_token>& tokens, size_t from_index, size_t to_index) const {
+        capture_results results;
+
+        if (from_index >= to_index) {
+            results.failure_message = "Invalid range: from_index must be less than to_index";
+            return results;
+        }
+
+        if (from_index >= tokens.size() || to_index > tokens.size()) {
+            results.failure_message = "Invalid range: from_index or to_index is out of bounds";
+            return results;
+        }
+
+        results.range_from_index   = from_index;
+        size_t current_token_index = from_index;
+
+        auto contains_token = [](const cstring& token, const std::vector<cstring>& tokens_to_check) -> bool {
+            return std::find(tokens_to_check.begin(), tokens_to_check.end(), token) != tokens_to_check.end();
         };
 
-        _ranges.emplace_back(t);
-        return *this;
-    }
+        for (auto& instruction : _parse_instructions) {
+            bool matched = false;
 
-    std::optional<captured_range> range_capture::try_capture(const std::vector<language_token>& tokens, const size_t start_offset, const size_t stop_index) const {
-        auto& token = tokens[start_offset];
+            switch (instruction.type) {
+                case instruction_type::match_single:
+                    {
+                        if (contains_token(tokens[current_token_index].text, instruction.match_tokens)) {
+                            results.add_captured_range(current_token_index, current_token_index, instruction.key);
+                            matched = true;
+                        } else {
+                            results.failure_message = "Failed to match single token.";
+                            matched = false;
+                            break;
+                        }
+                        current_token_index++;
 
-        if (token.text == _starts_with) {
-            captured_range result;
-            result.top_level_prelude = token.text;
-            result.from_token_index = start_offset;
+                        if (current_token_index > to_index) {
+                            results.failure_message = "Range not found within tokens.";
+                            matched = false;
+                            break;
+                        }
+                    }
+                    break;
+                case instruction_type::match_any:
+                    {
+                        if (contains_token(tokens[current_token_index].text, instruction.match_tokens)) {
+                            results.add_captured_range(current_token_index, current_token_index, instruction.key);
+                            matched = true;
+                        } else {
+                            results.failure_message = "Failed to match any of the specified tokens.";
+                            matched = false;
+                            break;
+                        }
+                        current_token_index++;
 
-            size_t current_token_index = start_offset + 1;
+                        if (current_token_index > to_index) {
+                            results.failure_message = "Range not found within tokens.";
+                            matched = false;
+                            break;
+                        }
+                    }
+                    break;
+                case instruction_type::match_range:
+                    {
+                        if (!(instruction.match_tokens.size() == 2)) {
+                            results.failure_message = "Invalid range capture instruction.";
+                            matched = false;
+                            break;
+                        }
 
-            if (_ranges.empty()) {
-                return std::nullopt;
-            }
+                        auto from_token = instruction.match_tokens.at(0);
+                        auto to_token   = instruction.match_tokens.at(1);
 
-            auto& first_range = _ranges.front();
+                        if (tokens[current_token_index].text != from_token) {
+                            results.failure_message = "Did not find expected opening token at start of range.";
+                            matched = false;
+                            break;
+                        }
 
-            while (tokens[current_token_index].text != first_range.from && current_token_index < stop_index) {
-                current_token_index++;
-            }
+                        auto open_count        = 1;
+                        auto close_count       = 0;
+                        auto start_token_index = current_token_index;
 
-            if (current_token_index == stop_index) {
-                return std::nullopt;
-            }
-
-            for (auto& range : _ranges) {
-                size_t from_counter = 0;
-                size_t to_counter   = 0;
-
-                auto& expected_next_token = range.from;
-                auto& actual_next_token   = tokens[current_token_index].text;
-
-                if (actual_next_token == expected_next_token) {
-                    token_range result_range;
-                    result_range.from_token_index = current_token_index;
-                    result_range.type             = range.type;
-
-                    from_counter++;
-
-                    while (from_counter != to_counter) {
-                        if ((tokens.size() - 1) > current_token_index) {
+                        while (open_count > close_count && current_token_index <= to_index) {
+                            if (tokens[current_token_index].text == to_token) {
+                                close_count++;
+                            } else if (tokens[current_token_index].text == from_token) {
+                                open_count++;
+                            }
                             current_token_index++;
-                            if (tokens[current_token_index].text == range.from) {
-                                from_counter++;
-                            } else if (tokens[current_token_index].text == range.to) {
-                                to_counter++;
+
+                            if (current_token_index > to_index) {
+                                results.failure_message = "Range not found within tokens.";
+                                break;
+                            }
+                        }
+
+                        results.add_captured_range(start_token_index, current_token_index, instruction.key);
+                        matched = true;
+                    }
+                    break;
+                case instruction_type::take_n:
+                    {
+                        if ((current_token_index + instruction.skip_count) > to_index) {
+                            results.failure_message = "Skipped beyond token range.";
+                            matched = false;
+                            break;
+                        }
+
+                        size_t start_index = current_token_index;
+                        current_token_index += instruction.skip_count;
+
+                        results.add_captured_range(start_index, current_token_index - 1, instruction.key);
+                        matched = true;
+                    }
+                    break;
+                case instruction_type::if_next_token_present:
+                    {
+                        if (contains_token(tokens[current_token_index].text, instruction.match_tokens)) {
+                            current_token_index++;
+
+                            if (current_token_index > to_index) {
+                                results.failure_message = "Range not found within tokens.";
+                                matched = false;
+                                break;
                             }
                         } else {
                             break;
                         }
                     }
+                    break;
+                case instruction_type::skip_count:
+                    {
+                        if ((current_token_index + instruction.skip_count) > to_index) {
+                            results.failure_message = "Skipped beyond token range.";
+                            matched = false;
+                            break;
+                        }
+                        current_token_index += instruction.skip_count;
+                    }
+                    break;
+                case instruction_type::skip_until:
+                    {
+                        if (instruction.match_tokens.empty()) {
+                            results.failure_message = "No tokens to skip until.";
+                            matched = false;
+                            break;
+                        }
 
-                    result_range.to_token_index = current_token_index;
-                    result.ranges.emplace_back(result_range);
-                }
+                        auto& token_to_find = instruction.match_tokens.front();
+
+                        auto start_token_index = current_token_index;
+
+                        while (current_token_index < to_index) {
+
+                            if (token_to_find == tokens[current_token_index].text) {
+                                break;
+                            }
+
+                            current_token_index++;
+
+                            if (current_token_index > to_index) {
+                                results.failure_message = "Range not found within tokens.";
+                                matched = false;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case instruction_type::undefined:
+                default:
+                    break;
             }
 
-            result.to_token_index = current_token_index;
-
-            return result;
-        } else {
-            return std::nullopt;
+            if (!matched) {
+                results.reset();
+                results.matched = false;
+                break;
+            }
         }
+
+        results.range_to_index = current_token_index;
+
+        return results;
     }
+
+
 }

@@ -38,9 +38,7 @@ namespace shade {
         }
 
         namespace attributes {
-            inline constexpr const char* attr_inline = "@inline";
-            inline constexpr const char* attr_async = "@async";
-            inline constexpr const char* attr_alignment = "@alignas";
+            inline constexpr const char* attr_indicator = "@";
             inline constexpr const char* attr_begin_arguments = groups::begin_group;
             inline constexpr const char* attr_end_arguments = groups::end_group;
             inline constexpr const char* attr_argument_seperator = groups::group_seperator_arguments;

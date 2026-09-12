@@ -79,7 +79,7 @@ namespace shade
 
         static cstring get_global_path()
         {
-            return spelling::modules::module_seperator;
+            return cstring::empty();
         }
     };
 }

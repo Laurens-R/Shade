@@ -7,47 +7,71 @@
 
 #include <optional>
 #include <vector>
+#include <unordered_map>
 
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 
 namespace shade {
 
-    enum class range_type {
-        group,
-        scope,
-        undefined
-    };
-
-    struct token_range {
-        size_t from_token_index = 0;
-        size_t to_token_index = 0;
-        cstring prelude = cstring::empty();
-        range_type type = range_type::undefined;
-    };
 
     struct captured_range {
-        cstring top_level_prelude = cstring::empty();
-        size_t from_token_index = 0;
-        size_t to_token_index = 0;
-        std::vector<token_range> ranges;
+        cstring key;
+        size_t  from_token_index = 0;
+        size_t  to_token_index   = 0;
+    };
+
+    struct capture_results {
+    private:
+        std::vector<captured_range>             _captured_ranges;
+        std::unordered_map<const char*, size_t> _captured_ranges_by_key;
+
+    public:
+        std::vector<capture_results> child_results;
+
+        bool    matched = false;
+        cstring failure_message;
+        size_t  range_from_index = 0;
+        size_t  range_to_index   = 0;
+
+        void reset();
+
+        void                          add_captured_range(size_t from, size_t to, const cstring& key);
+        std::optional<captured_range> get_captured_range(const cstring& key);
+
     };
 
     class range_capture {
-        struct range_tokens {
-            cstring from = cstring::empty();
-            cstring to = cstring::empty();
-            range_type type = range_type::undefined;
+        enum class instruction_type {
+            match_any,
+            match_single,
+            match_range,
+            take_n,
+            skip_until,
+            skip_count,
+            if_next_token_present,
+            undefined
         };
 
-        std::vector<cstring>      _captured;
-        std::vector<range_tokens> _ranges;
-        cstring                   _starts_with = cstring::empty();
-        cstring                   _continue_until_token = cstring::empty();
+        struct parse_instruction {
+            instruction_type     type = instruction_type::undefined;
+            std::vector<cstring> match_tokens;
+            size_t               skip_count = 0;
+            cstring              key;
+        };
+
+        std::vector<parse_instruction> _parse_instructions;
+
     public:
-        range_capture& if_start_with(const cstring & token);
-        range_capture& then_capture_range(const cstring & from, const cstring & to, const range_type type);
-        [[nodiscard]] std::optional<captured_range> try_capture(const std::vector<language_token>& tokens, size_t start_offset, size_t stop_index) const;
+        range_capture& match_and_capture_token(const cstring& token, const cstring& key);
+        range_capture& match_and_capture_any_token(const std::vector<cstring>& tokens, const cstring& key);
+        range_capture& capture_tokens_by_count(size_t count, const cstring& key);
+        range_capture& if_next_token_present(const cstring& token);
+        range_capture& skip_tokens_by(size_t count);
+        range_capture& skip_token_until(const cstring& token);
+        range_capture& capture_range(const cstring& from, const cstring& to, const cstring& key);
+
+        [[nodiscard]] capture_results try_capture(const std::vector<language_token>& tokens, size_t from_index, size_t to_index) const;
 
     };
 }

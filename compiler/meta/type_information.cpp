@@ -53,7 +53,7 @@ namespace shade
             break;
         }
 
-        switch (is_struct)
+        if (is_struct)
         {
             if (fields.empty())
             {
@@ -245,9 +245,10 @@ namespace shade
             {primitive_types::boolean, spelling::types::boolean}
         });
 
-        type_information result;
+        type_information result = {};
         result.is_primitive = true;
         result.primitive_type = primitive_type;
+        result.module_path = namespace_path::get_global_path();
         result.name = typemap.at(primitive_type);
 
         return result;
