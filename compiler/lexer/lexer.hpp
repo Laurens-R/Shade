@@ -9,13 +9,13 @@
 #include "../pipeline/compilecontext.h"
 
 namespace shade {
-    constexpr std::uint32_t CLAW_TOKENIZERSTATE_NONE           = 0b00000;
-    constexpr std::uint32_t CLAW_TOKENIZERSTATE_INTOKEN        = 0b00001;
-    constexpr std::uint32_t CLAW_TOKENIZERSTATE_INSTRING       = 0b00010;
+    constexpr std::uint32_t TOKENIZERSTATE_NONE           = 0b00000;
+    constexpr std::uint32_t TOKENIZERSTATE_INTOKEN        = 0b00001;
+    constexpr std::uint32_t TOKENIZERSTATE_INSTRING       = 0b00010;
     /// In a `//` line comment (until the next '\n') or a `/* … */` block comment (until '*/'). While set,
     /// every character is discarded and never tokenized — so a `"` inside a comment can't open a string.
-    constexpr std::uint32_t CLAW_TOKENIZERSTATE_INLINECOMMENT  = 0b00100;
-    constexpr std::uint32_t CLAW_TOKENIZERSTATE_INBLOCKCOMMENT = 0b01000;
+    constexpr std::uint32_t TOKENIZERSTATE_INLINECOMMENT  = 0b00100;
+    constexpr std::uint32_t TOKENIZERSTATE_INBLOCKCOMMENT = 0b01000;
 
     /**
      * @brief A single lexed token: its text plus the 1-based source position for diagnostics.
@@ -60,14 +60,18 @@ namespace shade {
      * line comment is still emitted as a token.
      */
     class lexer {
-    private:
+    public:
         std::unordered_set<char> _delimiters = {
             ' ', '\t', '\r'
         };
 
         std::unordered_set<char> _special_symbols = {
             '{', '}', '+', '-', '/', '*', '(', ')', '\'', '|', '&', '$', '!', '?', '@', ';', ':', '[', ']', '\\', '^', '=',
-            ',', '\n', '%', '<', '>', '~'
+            ',', '%', '<', '>', '~'
+        };
+
+        std::unordered_set<char> _ignored_symbols = {
+            '\n'
         };
 
         std::unordered_map<char, std::vector<cstring>> _extended_tokens = {
@@ -83,15 +87,15 @@ namespace shade {
             {'^', {"^="}},
             {'[', {"[]"}},
             {'+', {"++", "+="}},
-            {'-', {"--", "-="}},
+            {'-', {"--", "-=", "->"}},
             {'#', {"#label"}},
             {':', {"::"}},
             // '-' is deliberately NOT in _specialSymbols (a dedicated branch in Tokenize()
             // disambiguates signed numbers), so its compound tokens '--' / '-=' are matched there.
         };
-
+    private:
         cstring       _source;
-        std::uint32_t _state = CLAW_TOKENIZERSTATE_NONE;
+        std::uint32_t _state = TOKENIZERSTATE_NONE;
         compile_context & _context;
     public:
         explicit lexer(const cstring& source, compile_context & context);

@@ -24,12 +24,12 @@ namespace shade {
     struct capture_results {
     private:
         std::vector<captured_range>             _captured_ranges;
-        std::unordered_map<const char*, size_t> _captured_ranges_by_key;
+        std::unordered_map<std::string_view, size_t> _captured_ranges_by_key;
 
     public:
         std::vector<capture_results> child_results;
 
-        bool    matched = false;
+        bool    matched = true;
         cstring failure_message;
         size_t  range_from_index = 0;
         size_t  range_to_index   = 0;

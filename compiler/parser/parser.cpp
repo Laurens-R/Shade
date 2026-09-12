@@ -2,52 +2,13 @@
 // Created by laure on 10/09/2026.
 //
 
-#include "parser.h"
+#include "parser.hpp"
 
 #include "range_capture.h"
 #include "../lang/spelling.hpp"
+#include "parser_range_keys.hpp"
 
 namespace shade {
-
-    struct range_keys {
-        static inline const char * attribute_indicator = "attribute_indicator";
-        static inline const char * attribute_name = "attribute_name";
-        static inline const char * attribute_arguments = "attribute_arguments";
-
-        static inline const char * module_indicator = "module_indicator";
-        static inline const char * module_name = "module_name";
-        static inline const char * module_body = "module_range";
-
-        static inline const char * struct_indicator = "struct_indicator";
-        static inline const char * struct_name = "struct_name";
-        static inline const char * struct_body = "struct_range";
-
-        static inline const char * function_indicator = "function_indicator";
-        static inline const char * function_name = "function_name";
-        static inline const char * function_arguments = "function_arguments";
-        static inline const char * function_body = "function_body";
-
-        static inline const char * if_indicator = "if_indicator";
-        static inline const char * if_condition = "if_condition";
-        static inline const char * if_body = "if_body";
-
-        static inline const char * if_else_indicator = "if_else_indicator";
-        static inline const char * if_else_condition = "if_else_condition";
-        static inline const char * if_else_body = "if_else_body";
-
-        static inline const char * else_indicator = "else_indicator";
-        static inline const char * else_body = "else_body";
-
-        static inline const char * for_loop_indicator = "for_loop_indicator";
-        static inline const char * for_loop_instructions = "for_loop_instructions";
-        static inline const char * for_loop_body = "for_loop_body";
-
-        static inline const char * while_loop_indicator = "while_loop_indicator";
-        static inline const char * while_loop_condition = "while_loop_condition";
-        static inline const char * while_loop_body = "while_loop_body";
-
-        static inline const char * raw_scope = "raw_scope_begin";
-    };
 
     struct capture_methods {
         range_capture attribute_range;
@@ -80,40 +41,40 @@ namespace shade {
             .if_next_token_present(spelling::attributes::attr_begin_arguments)
             .capture_range(spelling::attributes::attr_begin_arguments, spelling::attributes::attr_end_arguments, range_keys::attribute_arguments);
 
-            module_range.match_and_capture_token(spelling::modules::module_name, range_keys::module_indicator)
+            module_range.match_and_capture_token(spelling::modules::module_name, range_keys::module_keyword)
             .capture_tokens_by_count(1, range_keys::module_name)
-            .capture_range(spelling::modules::begin_scope, spelling::modules::end_scope, range_keys::module_body);
+            .capture_range(spelling::modules::begin_body, spelling::modules::end_body, range_keys::module_body);
 
-            struct_range.match_and_capture_token(spelling::structs::struct_indicator, range_keys::struct_indicator)
+            struct_range.match_and_capture_token(spelling::structs::struct_indicator, range_keys::struct_keyword)
             .capture_tokens_by_count(1, range_keys::struct_name)
-            .capture_range(spelling::structs::struct_begin_scope, spelling::structs::struct_end_scope, range_keys::struct_body);
+            .capture_range(spelling::structs::begin_body, spelling::structs::end_body, range_keys::struct_body);
 
             function_range.match_and_capture_token(spelling::functions::func_indicator, range_keys::function_indicator)
             .capture_tokens_by_count(1, range_keys::function_name)
-            .capture_range(spelling::functions::func_start_arguments, spelling::functions::func_end_arguments, range_keys::function_arguments)
-            .capture_range(spelling::functions::func_begin_scope, spelling::functions::func_end_scope, range_keys::function_body);
+            .capture_range(spelling::functions::begin_arguments, spelling::functions::end_arguments, range_keys::function_arguments)
+            .capture_range(spelling::functions::begin_body, spelling::functions::end_body, range_keys::function_body);
 
             if_range.match_and_capture_token(spelling::conditional::if_start, range_keys::if_indicator)
             .capture_range(spelling::conditional::begin_condition_group, spelling::conditional::end_condition_group, range_keys::if_condition)
-            .capture_range(spelling::conditional::begin_scope, spelling::conditional::end_scope, range_keys::if_body);
+            .capture_range(spelling::conditional::begin_body, spelling::conditional::end_body, range_keys::if_body);
 
             if_else_range.match_and_capture_token(spelling::conditional::if_start, range_keys::if_else_indicator)
             .match_and_capture_token(spelling::conditional::if_else, range_keys::if_else_indicator)
             .capture_range(spelling::conditional::begin_condition_group, spelling::conditional::end_condition_group, range_keys::if_else_condition)
-            .capture_range(spelling::conditional::begin_scope, spelling::conditional::end_scope, range_keys::if_else_body);
+            .capture_range(spelling::conditional::begin_body, spelling::conditional::end_body, range_keys::if_else_body);
 
             else_range.match_and_capture_token(spelling::conditional::if_else, range_keys::else_indicator)
-            .capture_range(spelling::conditional::begin_scope, spelling::conditional::end_scope, range_keys::if_else_body);
+            .capture_range(spelling::conditional::begin_body, spelling::conditional::end_body, range_keys::if_else_body);
 
             for_loop_range.match_and_capture_token(spelling::loops::loop_for, range_keys::for_loop_indicator)
-            .capture_range(spelling::loops::start_conditions, spelling::loops::end_conditions, range_keys::for_loop_instructions)
-            .capture_range(spelling::loops::begin_scope, spelling::loops::end_scope, range_keys::for_loop_body);
+            .capture_range(spelling::loops::begin_conditions, spelling::loops::end_conditions, range_keys::for_loop_instructions)
+            .capture_range(spelling::loops::begin_body, spelling::loops::end_body, range_keys::for_loop_body);
 
             while_loop_range.match_and_capture_token(spelling::loops::loop_while, range_keys::while_loop_indicator)
-            .capture_range(spelling::loops::start_conditions, spelling::loops::end_conditions, range_keys::while_loop_condition)
-            .capture_range(spelling::loops::begin_scope, spelling::loops::end_scope, range_keys::while_loop_body);
+            .capture_range(spelling::loops::begin_conditions, spelling::loops::end_conditions, range_keys::while_loop_condition)
+            .capture_range(spelling::loops::begin_body, spelling::loops::end_body, range_keys::while_loop_body);
 
-            raw_scope_range.capture_range(spelling::scopes::begin_scope, spelling::scopes::end_scope, range_keys::raw_scope);
+            raw_scope_range.capture_range(spelling::scopes::begin_body, spelling::scopes::end_body, range_keys::raw_scope);
 
             statement_range.skip_token_until(spelling::actions::end_of_statement);
 
@@ -133,9 +94,11 @@ namespace shade {
 
     static size_t process_body_map(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> & results) {
         auto & capture_methods = get_capture_methods();
-        auto current_token_index = from_token_index;
 
-        while (current_token_index <= to_token_index) {
+        //we increment the current token index because the first token is the begin-body symbol.
+        auto current_token_index = from_token_index + 1;
+
+        while (current_token_index < to_token_index) {
             /*
              * If-then-else statements
              */
@@ -229,7 +192,9 @@ namespace shade {
 
     static size_t process_struct_map(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> & results) {
         auto & capture_methods = get_capture_methods();
-        auto current_token_index = from_token_index;
+
+        //we increment the current token index because the first token is the begin-body symbol.
+        auto current_token_index = from_token_index + 1;
 
         while (current_token_index <= to_token_index) {
             /*
@@ -256,8 +221,16 @@ namespace shade {
     }
 
     static void generate_parse_map(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> & results) {
-        auto & capture_methods = get_capture_methods();
 
+        //this can happen in case a passed down subscope is empty (e.g. a function with no body)
+        //you want to call generate_parse_map with +1 from_token_index and -1 to_token_index to
+        //ensure that you don't include the begin and end tokens of the subscope. However
+        //this causes that from_token_index > to_token_index.
+        if (from_token_index > to_token_index) {
+            return;
+        }
+
+        auto & capture_methods = get_capture_methods();
         auto current_token_index = from_token_index;
 
         while (current_token_index <= to_token_index) {
@@ -271,11 +244,13 @@ namespace shade {
                 if (module_body_result) {
                     auto & module_body = module_body_result.value();
 
-                    //we recurse into this method for scopes because the global scope is a module.
+                    //we recurse into this method for scopes because these can be nested
+                    //note the the concequence of thsi is the from_token_index > to_token_index
+                    //situation as outlined above.
                     generate_parse_map(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, module_result.child_results);
                 }
                 results.push_back(module_result);
-                current_token_index = module_result.range_from_index + 1;
+                current_token_index = module_result.range_to_index + 1;
                 continue;
             }
 
@@ -290,7 +265,7 @@ namespace shade {
                     process_struct_map(tokens, struct_body.from_token_index + 1, struct_body.to_token_index - 1, struct_result.child_results);
                 }
                 results.push_back(struct_result);
-                current_token_index = struct_result.range_from_index + 1;
+                current_token_index = struct_result.range_to_index + 1;
                 continue;
             }
 
@@ -305,7 +280,7 @@ namespace shade {
                     process_body_map(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
                 }
                 results.push_back(function_result);
-                current_token_index = function_result.range_from_index + 1;
+                current_token_index = function_result.range_to_index + 1;
                 continue;
             }
 
@@ -313,11 +288,11 @@ namespace shade {
 
             current_token_index++;
         }
-
     }
 
-    void parser::parse(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index) {
+    std::vector<capture_results> parser::first_pass(const std::vector<language_token>& tokens, const size_t from_token_index, const size_t to_token_index) {
         std::vector<capture_results> parse_map;
         generate_parse_map(tokens, from_token_index, to_token_index, parse_map);
+        return parse_map;
     }
 } // shade

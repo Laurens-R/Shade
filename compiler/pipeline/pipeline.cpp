@@ -6,7 +6,7 @@
 #include "compilecontext.h"
 
 #include "../lexer/lexer.hpp"
-#include "../parser/parser.h"
+#include "../parser/parser.hpp"
 
 
 namespace shade {
@@ -25,7 +25,7 @@ namespace shade {
 
         //phase 3: parse tokens into AST
         auto parser = shade::parser(context);
-        parser.parse(tokens, 0, tokens.size() - 1);
+        parser.first_pass(tokens, 0, tokens.size() - 1);
 
         //phase 4: optimize AST
 

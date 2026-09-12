@@ -29,7 +29,7 @@ namespace shade
             }
             const char commentChar = _source.at(index);
 
-            if (is_flag_set(_state, CLAW_TOKENIZERSTATE_INLINECOMMENT))
+            if (is_flag_set(_state, TOKENIZERSTATE_INLINECOMMENT))
             {
                 if (commentChar != '\n')
                 {
@@ -37,13 +37,13 @@ namespace shade
                     continue;
                 }
 
-                _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INLINECOMMENT);
+                _state = clear_flag(_state, TOKENIZERSTATE_INLINECOMMENT);
             }
-            else if (is_flag_set(_state, CLAW_TOKENIZERSTATE_INBLOCKCOMMENT))
+            else if (is_flag_set(_state, TOKENIZERSTATE_INBLOCKCOMMENT))
             {
                 if (commentChar == '*' && index + 1 < _source.length() && _source.at(index + 1) == '/')
                 {
-                    _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INBLOCKCOMMENT);
+                    _state = clear_flag(_state, TOKENIZERSTATE_INBLOCKCOMMENT);
                     column_counter += 2;
                     ++index;
                     continue;
@@ -62,7 +62,7 @@ namespace shade
                 continue;
             }
             else if (
-                !is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING)
+                !is_flag_set(_state, TOKENIZERSTATE_INSTRING)
                 && commentChar == '/'
                 && index + 1 < _source.length()
                 && (_source.at(index + 1) == '/' || _source.at(index + 1) == '*')
@@ -76,19 +76,18 @@ namespace shade
 
                 _state = set_flag(_state,
                                   _source.at(index + 1) == '/'
-                                      ? CLAW_TOKENIZERSTATE_INLINECOMMENT
-                                      : CLAW_TOKENIZERSTATE_INBLOCKCOMMENT);
+                                      ? TOKENIZERSTATE_INLINECOMMENT
+                                      : TOKENIZERSTATE_INBLOCKCOMMENT);
 
-                _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                _state = clear_flag(_state, TOKENIZERSTATE_INTOKEN);
                 column_counter += 2;
                 ++index;
                 continue;
             }
 
-            if (char c = _source.at(index); _delimiters.contains(c) && !
-                is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING))
+            if (char c = _source.at(index); _delimiters.contains(c) && !is_flag_set(_state, TOKENIZERSTATE_INSTRING))
             {
-                _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                _state = clear_flag(_state, TOKENIZERSTATE_INTOKEN);
                 if (current_token.text.length() > 0)
                 {
                     tokens.push_back(current_token);
@@ -99,7 +98,8 @@ namespace shade
             }
             else
             {
-                if (c == '\\' && is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING) && index + 1 < _source.length())
+                //if we are in a string and we need to check for escape sequences
+                if (c == '\\' && is_flag_set(_state, TOKENIZERSTATE_INSTRING) && index + 1 < _source.length())
                 {
                     char decoded = 0;
                     switch (_source.at(index + 1))
@@ -132,7 +132,7 @@ namespace shade
                 // emit a '-' / '+' operator. Guarded tightly to a mantissa-then-exponent shape: the token
                 // so far starts with a digit (numeric, not an identifier) and ends with 'e'/'E' preceded
                 // by a digit. So `a-1`, `5-3`, `0xabce-1` are untouched; only `<digits>[.<digits>]e` is.
-                if ((c == '+' || c == '-') && !is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING)
+                if ((c == '+' || c == '-') && !is_flag_set(_state, TOKENIZERSTATE_INSTRING)
                     && current_token.text.length() >= 2)
                 {
                     const size_t len = current_token.text.length();
@@ -148,7 +148,8 @@ namespace shade
                         continue;
                     }
                 }
-                if (_special_symbols.contains(c) && !is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING))
+                //if we are not in a string, but need to check for special symbols in character form.
+                if (_special_symbols.contains(c) && !is_flag_set(_state, TOKENIZERSTATE_INSTRING))
                 {
                     if (c == '\'')
                     {
@@ -198,7 +199,7 @@ namespace shade
                                 line_counter,
                                 column_counter);
                             index += consumed;
-                            _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                            _state = clear_flag(_state, TOKENIZERSTATE_INTOKEN);
                             continue;
                         }
                         //not a char literal: fall through to the ordinary special-symbol handling below.
@@ -246,13 +247,13 @@ namespace shade
                         tokens.emplace_back(c, line_counter, column_counter);
                     }
 
-                    _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                    _state = clear_flag(_state, TOKENIZERSTATE_INTOKEN);
                 }
                 else if (c == '"')
                 {
-                    if (!is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING))
+                    if (!is_flag_set(_state, TOKENIZERSTATE_INSTRING))
                     {
-                        _state = set_flag(_state, CLAW_TOKENIZERSTATE_INSTRING);
+                        _state = set_flag(_state, TOKENIZERSTATE_INSTRING);
 
                         if (current_token.text.length() > 0)
                         {
@@ -266,7 +267,7 @@ namespace shade
                     }
                     else
                     {
-                        _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INSTRING);
+                        _state = clear_flag(_state, TOKENIZERSTATE_INSTRING);
                         tokens.push_back(current_token);
                         tokens.emplace_back(c, line_counter, column_counter);
                         current_token = {};
@@ -274,63 +275,14 @@ namespace shade
                         current_token.column = column_counter;
                     }
                 }
-                else if (c == '-')
-                {
-                    // '-' is handled specially to distinguish a signed-number sign from the operator.
-                    // this cannot be otherwise captured by the default rule definitions
-                    if (!is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING))
-                    {
-                        if (index + 1 < _source.length() && (_source.at(index + 1) == '-' || _source.at(index + 1) == '='))
-                        {
-                            if (current_token.text.length() > 0)
-                            {
-                                tokens.push_back(current_token);
-                            }
-
-                            cstring twoChar(c);
-                            twoChar.append(_source.at(index + 1));
-                            tokens.emplace_back(twoChar, line_counter, column_counter);
-
-                            current_token = {};
-                            current_token.line = line_counter;
-                            current_token.column = column_counter;
-                            _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
-
-                            ++index;
-                        }
-                        else if (index + 1 < _source.length() && std::isdigit(_source.at(index + 1)))
-                        {
-                            _state = set_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
-                            current_token.text.append(c);
-                        }
-                        else
-                        {
-                            if (current_token.text.length() > 0)
-                            {
-                                tokens.push_back(current_token);
-                            }
-
-                            tokens.emplace_back(c, line_counter, column_counter);
-                            current_token = {};
-                            current_token.line = line_counter;
-                            current_token.column = column_counter;
-                            _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
-                        }
-                    }
-                    else
-                    {
-                        //inside a string literal '-' is an ordinary character.
-                        current_token.text.append(c);
-                    }
-                }
                 else if (c == '.')
                 {
                     //decimal handling
-                    if (!is_flag_set(_state, CLAW_TOKENIZERSTATE_INSTRING))
+                    if (!is_flag_set(_state, TOKENIZERSTATE_INSTRING))
                     {
                         if (index + 1 < _source.length() && std::isdigit(_source.at(index + 1)))
                         {
-                            _state = set_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                            _state = set_flag(_state, TOKENIZERSTATE_INTOKEN);
                             current_token.text.append(c);
                         }
                         else
@@ -344,7 +296,7 @@ namespace shade
                             current_token = {};
                             current_token.line = line_counter;
                             current_token.column = column_counter;
-                            _state = clear_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
+                            _state = clear_flag(_state, TOKENIZERSTATE_INTOKEN);
                         }
                     }
                     else
@@ -355,8 +307,11 @@ namespace shade
                 }
                 else
                 {
-                    _state = set_flag(_state, CLAW_TOKENIZERSTATE_INTOKEN);
-                    current_token.text.append(c);
+
+                    if (!_ignored_symbols.contains(c)) {
+                        _state = set_flag(_state, TOKENIZERSTATE_INTOKEN);
+                        current_token.text.append(c);
+                    }
                 }
             }
 

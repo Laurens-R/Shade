@@ -8,7 +8,7 @@
 
 TEST(namespaces, global_path) {
     auto global_path = shade::namespace_path::get_global_path();
-    ASSERT_EQ(global_path, shade::spelling::modules::module_seperator);
+    ASSERT_EQ(global_path, shade::cstring::empty());
 }
 
 TEST(namespaces, part_splitting) {

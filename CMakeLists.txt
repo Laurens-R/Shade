@@ -64,7 +64,7 @@ SET( LIB_SHADE_SOURCES
        compiler/utils/cstring.cpp
        compiler/lang/spelling.hpp
        compiler/parser/parser.cpp
-       compiler/parser/parser.h
+       compiler/parser/parser.hpp
        compiler/parser/range_capture.cpp
        compiler/parser/range_capture.h
        compiler/lexer/lexer.hpp
@@ -92,7 +92,8 @@ SET( LIB_SHADE_SOURCES
        compiler/utils/exceptions.hpp
        compiler/meta/module_definition.cpp
        compiler/meta/module_definition.hpp
-       compiler/lang/namespace.hpp)
+       compiler/lang/namespace.hpp
+        compiler/parser/parser_range_keys.hpp)
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
 target_include_directories(lib_shade PUBLIC compiler)
@@ -104,7 +105,11 @@ target_link_libraries(shade PRIVATE lib_shade)
 add_subdirectory(vendor/googletest)
 enable_testing()
 add_executable(tests tests/namespace_tests.cpp
-        tests/cstring_tests.cpp)
+        tests/cstring_tests.cpp
+        tests/lexer_tests.cpp
+        tests/tests_common.hpp
+        tests/test_parser.cpp
+        tests/range_capture_test.cpp)
 target_include_directories(tests PUBLIC compiler)
 target_link_libraries(tests PRIVATE lib_shade)
 target_link_libraries(tests PRIVATE GTest::gtest_main )
