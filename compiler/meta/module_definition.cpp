@@ -6,37 +6,34 @@
 #include "../lang/spelling.hpp"
 #include "../lang/namespace.hpp"
 
-namespace shade
-{
-    module_definition * module_definition::find_namespace(const cstring& namespace_path)
-    {
+namespace shade {
+    module_definition::module_definition()
+        : _child_modules{std::make_unique<std::deque<module_definition> >()} {}
+
+    module_definition::module_definition(const cstring &module_name, const cstring &module_path)
+        : _child_modules{std::make_unique<std::deque<module_definition> >()}, name(module_name), full_path{module_path} {}
+
+    module_definition *module_definition::find_namespace(const cstring &namespace_path) {
         if (namespace_path.is_empty()) return nullptr;
 
-        if (namespace_path::is_part_of(namespace_path, full_path))
-        {
-            cstring relative_path = namespace_path::get_relative_path(namespace_path, full_path);
-            auto remaining_parts = namespace_path::get_parts(relative_path);
+        if (namespace_path::is_part_of(namespace_path, full_path)) {
+            cstring relative_path   = namespace_path::get_relative_path(namespace_path, full_path);
+            auto    remaining_parts = namespace_path::get_parts(relative_path);
 
-            if (remaining_parts.empty())
-            {
+            if (remaining_parts.empty()) {
                 return nullptr;
             }
 
-            auto & next_module = remaining_parts.front();
+            auto &next_module = remaining_parts.front();
 
-            for (auto & module : child_modules)
-            {
-                if (module.name == next_module)
-                {
-                    if (remaining_parts.size() == 1)
-                    {
+            for (auto &module: *_child_modules) {
+                if (module.name == next_module) {
+                    if (remaining_parts.size() == 1) {
                         return &module;
-                    }
-                    else
-                    {
+                    } else {
                         //TEST TEST TEST
-                        auto smaller_path_parts = std::vector<cstring>(remaining_parts.begin() + 1, remaining_parts.end());
-                        cstring next_layer_path = namespace_path::get_path_from_parts(smaller_path_parts);
+                        auto    smaller_path_parts = std::vector<cstring>(remaining_parts.begin(), remaining_parts.end());
+                        cstring next_layer_path    = namespace_path::get_path_from_parts(smaller_path_parts);
                         return find_namespace(next_layer_path);
                     }
                 }
@@ -46,9 +43,8 @@ namespace shade
         return nullptr;
     }
 
-    module_definition * module_definition::add_child_module(const cstring &child_name)
-    {
-        auto fp =  cstring::empty();
+    module_definition *module_definition::add_child_module(const cstring &child_name) {
+        auto fp = cstring::empty();
 
         if (!full_path.is_empty()) {
             fp = full_path + spelling::modules::module_seperator + child_name;
@@ -56,16 +52,10 @@ namespace shade
             fp = child_name;
         };
 
-        child_modules.push_back( {
-            .name = child_name,
-            .full_path = fp
-        });
+        _child_modules->emplace_back(
+            child_name, fp
+        );
 
-        return &child_modules.back();
-    }
-
-    void module_definition::add_type(const type_information& type)
-    {
-        child_types.push_back(type);
+        return &_child_modules->back();
     }
 } // shade

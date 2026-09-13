@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <span>
 
 #include "module_definition.hpp"
 #include "../lang/namespace.hpp"
@@ -38,6 +39,10 @@ namespace shade {
                 add_typeinformation(type_information::get_for_primitive_type(primitive_types::f32));
                 add_typeinformation(type_information::get_for_primitive_type(primitive_types::f64));
                 add_typeinformation(type_information::get_for_primitive_type(primitive_types::string));
+            }
+
+            std::span<const type_information> get_types() {
+                return _registered_types;
             }
 
             bool add_typeinformation(const type_information &typeinfo) {
