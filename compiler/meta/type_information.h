@@ -41,7 +41,7 @@ namespace shade {
 
     struct type_field_definition {
         cstring           name                     = cstring::empty();
-        type_information* related_type_information = {};
+        type_information *related_type_information = {};
         size_t            offset                   = 0;
     };
 
@@ -60,9 +60,10 @@ namespace shade {
         std::vector<function>              methods;
         cstring                            name             = cstring::empty();
         cstring                            module_path      = cstring::empty();
+        cstring                            full_path        = cstring::empty();
         primitive_types                    primitive_type   = primitive_types::unknown;
         reference_type                     reference_type   = reference_type::none;
-        ast_node*                          related_node     = nullptr;
+        ast_node *                         related_node     = nullptr;
         uint64_t                           fixed_array_size = 0;
         uint8_t                            alignment        = sizeof(uintptr_t);
         bool                               is_primitive     = false;
@@ -75,19 +76,23 @@ namespace shade {
 
         ~type_information() = default;
 
-        [[nodiscard]] size_t   get_size() const;
-        [[nodiscard]] cstring  get_full_path() const;
+        [[nodiscard]] size_t get_size() const;
+
         [[nodiscard]] uint64_t get_hash() const;
 
         void calculate_offsets();
+
         [[nodiscard]] bool are_fields_valid() const;
 
-        void add_field(const cstring& field_name, type_information* type);
-        void add_method(const cstring& method_name, ast_node * related_node, type_information* return_type, const std::vector<function_argument>& arguments);
+        void add_field(const cstring &field_name, type_information *type);
 
-        std::expected<type_information, generics_error> monomorphize(const std::vector<type_information*> types);
-        static type_information                         get_for_primitive_type(primitive_types primitive_type);
-        static type_information                         create_struct(const cstring& name, ast_node* related_node, size_t alignment = sizeof(uintptr_t));
+        void add_method(const cstring &method_name, ast_node *related_node, type_information *return_type, const std::vector<function_argument> &arguments);
+
+        std::expected<type_information, generics_error> monomorphize(const std::vector<type_information *> types);
+
+        static type_information get_for_primitive_type(primitive_types primitive_type);
+
+        static type_information create_struct(const cstring &full_path, ast_node *related_node, size_t alignment = sizeof(uintptr_t));
 
         metadata_type get_type() override;
     };

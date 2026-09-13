@@ -109,10 +109,17 @@ add_executable(tests tests/namespace_tests.cpp
         tests/lexer_tests.cpp
         tests/tests_common.hpp
         tests/parser_tests.cpp
-        tests/range_capture_test.cpp)
+        tests/range_capture_test.cpp
+        tests/parser_scan_tests.cpp)
 target_include_directories(tests PUBLIC compiler)
 target_link_libraries(tests PRIVATE lib_shade)
 target_link_libraries(tests PRIVATE GTest::gtest_main )
 
 include(GoogleTest)
 gtest_discover_tests(tests)
+
+add_executable(benchmark benchmark/main.cpp
+                         benchmark/nanobench.cpp)
+target_include_directories(benchmark PUBLIC compiler)
+target_include_directories(benchmark PUBLIC vendor/nanobench)
+target_link_libraries(benchmark PRIVATE lib_shade)

@@ -64,15 +64,8 @@ namespace shade {
         return 0;
     }
 
-    inline cstring type_information::get_full_path() const {
-        cstring full_path = module_path + spelling::modules::module_seperator + name;
-
-
-        return full_path;
-    }
-
     uint64_t type_information::get_hash() const {
-        const cstring path = get_full_path();
+        const cstring path = full_path;
 
         if (path.is_empty()) {
             throw compiler_exception("get_hash: provided path was null or empty. A field must have a full path.");
@@ -221,10 +214,11 @@ namespace shade {
         return result;
     }
 
-    type_information type_information::create_struct(const cstring& name, ast_node* related_node, size_t alignment) {
+    type_information type_information::create_struct(const cstring& full_path, ast_node* related_node, size_t alignment) {
         type_information result;
 
-        result.name         = name;
+        result.name         = namespace_path::get_type_from_path(full_path);
+        result.full_path    = full_path;
         result.is_struct    = true;
         result.alignment    = alignment;
         result.related_node = related_node;

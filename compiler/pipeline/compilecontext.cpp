@@ -26,7 +26,7 @@ namespace shade {
         return _lookup_paths;
     }
 
-    type_index compile_context::get_type_index() const
+    type_index & compile_context::get_type_index()
     {
         return _types;
     }

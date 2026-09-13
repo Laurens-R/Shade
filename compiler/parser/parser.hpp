@@ -18,10 +18,11 @@ namespace shade {
     private:
         compile_context & _context;
         std::vector<capture_results> _code_map;
+        const std::vector<language_token>& _tokens;
     public:
-        parser(compile_context & context);
+        parser(compile_context & context, const std::vector<language_token>& tokens);
 
-        std::vector<capture_results> & first_pass(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
+        std::vector<capture_results> & first_pass();
         void analyze_first_pass();
     };
 

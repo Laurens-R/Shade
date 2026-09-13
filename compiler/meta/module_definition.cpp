@@ -46,12 +46,22 @@ namespace shade
         return nullptr;
     }
 
-    void module_definition::add_child_module(const cstring & child_name)
+    module_definition * module_definition::add_child_module(const cstring &child_name)
     {
+        auto fp =  cstring::empty();
+
+        if (!full_path.is_empty()) {
+            fp = full_path + spelling::modules::module_seperator + child_name;
+        } else {
+            fp = child_name;
+        };
+
         child_modules.push_back( {
             .name = child_name,
-            .full_path = full_path + spelling::modules::module_seperator + name
+            .full_path = fp
         });
+
+        return &child_modules.back();
     }
 
     void module_definition::add_type(const type_information& type)

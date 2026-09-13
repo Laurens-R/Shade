@@ -24,7 +24,8 @@ namespace shade
         cstring full_path;
 
         module_definition * find_namespace(const cstring & namespace_path);
-        void add_child_module(const cstring & child_name);
+
+        module_definition * add_child_module(const cstring &child_name);
         void add_type(const type_information & type);
     };
 } // shade

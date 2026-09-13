@@ -24,10 +24,10 @@ namespace shade {
         const auto tokens = lex.tokenize();
 
         //phase 3: parse tokens into AST
-        auto parser = shade::parser(context);
+        auto parser = shade::parser(context, tokens);
 
         //first parse pass: get a overall code map by an initial parse of all the source sections
-        parser.first_pass(tokens, 0, tokens.size() - 1);
+        parser.first_pass();
 
         //second parse pass: scan through the map to register all found types (structs) this will allow us to resolve type references
         //without requiring source-order declarations during the in-depth parse pass

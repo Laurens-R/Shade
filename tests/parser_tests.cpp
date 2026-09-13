@@ -17,8 +17,8 @@ TEST(parser, basic_variable) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -39,8 +39,8 @@ TEST(parser, basic_if) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -63,8 +63,8 @@ TEST(parser, if_else) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 2);
 
@@ -93,8 +93,8 @@ TEST(parser, if_else_if) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 2);
 
@@ -127,8 +127,8 @@ TEST(parser, if_else_if_else) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 3);
 
@@ -164,8 +164,8 @@ TEST(parser, basic_for) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -187,8 +187,8 @@ TEST(parser, basic_while) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -209,8 +209,8 @@ TEST(parser, basic_module) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -236,8 +236,8 @@ TEST(parser, nested_module_2) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -262,6 +262,39 @@ TEST(parser, nested_module_2) {
     ASSERT_EQ(tokens[submodule_name_result.from_token_index].text, "subname");
 }
 
+TEST(parser, multiple_modules) {
+    shade::compile_context context;
+    constexpr const char * source = R"(
+        module a { }
+
+        module b { }
+    )";
+
+    auto lex = shade::lexer(source, context);
+    const auto tokens = lex.tokenize();
+
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
+
+    ASSERT_TRUE(parse_map.size() == 2);
+
+    auto & module_result = parse_map.at(0);
+
+    ASSERT_EQ(module_result.type_key, shade::range_keys::module_type_key);
+
+    ASSERT_TRUE(module_result.get_captured_range(shade::range_keys::module_keyword).has_value());
+    ASSERT_TRUE(module_result.get_captured_range(shade::range_keys::module_name).has_value());
+    ASSERT_TRUE(module_result.get_captured_range(shade::range_keys::module_body).has_value());
+
+    auto & module2_result = parse_map.at(1);
+
+    ASSERT_EQ(module2_result.type_key, shade::range_keys::module_type_key);
+
+    ASSERT_TRUE(module2_result.get_captured_range(shade::range_keys::module_keyword).has_value());
+    ASSERT_TRUE(module2_result.get_captured_range(shade::range_keys::module_name).has_value());
+    ASSERT_TRUE(module2_result.get_captured_range(shade::range_keys::module_body).has_value());
+}
+
 TEST(parser, module_with_variable) {
     shade::compile_context context;
     constexpr const char * source = R"(
@@ -273,8 +306,8 @@ TEST(parser, module_with_variable) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -301,8 +334,8 @@ TEST(parser, basic_struct) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -326,8 +359,8 @@ TEST(parser, bare_function) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -353,8 +386,8 @@ TEST(parser, bare_function_with_return_type) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -382,8 +415,8 @@ TEST(parser, bare_function_with_generics_and_return_type) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -414,8 +447,8 @@ TEST(parser, struct_with_func) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -456,8 +489,8 @@ TEST(parser, module_with_func) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 
@@ -500,8 +533,8 @@ TEST(parser, module_struct_func) {
     auto lex = shade::lexer(source, context);
     const auto tokens = lex.tokenize();
 
-    auto parse = shade::parser(context);
-    auto parse_map = parse.first_pass(tokens, 0, tokens.size() -1);
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
 
     ASSERT_TRUE(parse_map.size() == 1);
 

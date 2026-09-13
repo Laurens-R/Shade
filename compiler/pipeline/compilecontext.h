@@ -32,7 +32,7 @@ namespace shade {
         const std::vector<diagnostic>& get_information() const;
         const std::vector<diagnostic>& get_debug_messages() const;
         const std::vector<cstring>& get_lookup_paths() const;
-        type_index get_type_index() const;
+        type_index & get_type_index();
 
         void log_error(const size_t line, const size_t column, const cstring & message);
         void log_warning(const size_t line, const size_t column, const cstring & message);
