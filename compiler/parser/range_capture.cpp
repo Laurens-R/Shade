@@ -25,12 +25,35 @@ namespace shade {
         return _captured_ranges[_captured_ranges_by_key.at(key.to_c_string())];
     }
 
+    size_t capture_results::get_size() {
+        return _captured_ranges.size();
+    }
+
+    std::optional<captured_range> capture_results::get_captured_range_at(const size_t index) {
+        if (index >= _captured_ranges.size()) {
+            return std::nullopt;
+        }
+        return _captured_ranges[index];
+    }
+
+    range_capture& range_capture::optional_match_and_capture_token(const cstring& token, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::optional_match_single,
+            .match_tokens = {token},
+            .skip_count = 0,
+            .key = key,
+            .previous_key = cstring::empty()
+        });
+        return *this;
+    }
+
     range_capture& range_capture::match_and_capture_token(const cstring& token, const cstring& key) {
         _parse_instructions.push_back({
             .type = instruction_type::match_single,
             .match_tokens = {token},
             .skip_count = 0,
-            .key = key
+            .key = key,
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -40,7 +63,8 @@ namespace shade {
             .type = instruction_type::match_any,
             .match_tokens = tokens,
             .skip_count = 0,
-            .key = key
+            .key = key,
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -50,7 +74,8 @@ namespace shade {
             .type = instruction_type::take_n,
             .match_tokens = {},
             .skip_count = count,
-            .key = key
+            .key = key,
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -60,7 +85,8 @@ namespace shade {
             .type = instruction_type::if_next_token_present,
             .match_tokens = {token},
             .skip_count = 0,
-            .key = cstring::empty()
+            .key = cstring::empty(),
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -70,7 +96,8 @@ namespace shade {
             .type = instruction_type::skip_count,
             .match_tokens = {},
             .skip_count = count,
-            .key = cstring::empty()
+            .key = cstring::empty(),
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -80,7 +107,30 @@ namespace shade {
             .type = instruction_type::skip_until,
             .match_tokens = {token},
             .skip_count = 0,
-            .key = cstring::empty()
+            .key = cstring::empty(),
+            .previous_key = cstring::empty()
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::take_token_until(const cstring& token, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::take_until,
+            .match_tokens = {token},
+            .skip_count = 0,
+            .key = key,
+            .previous_key = cstring::empty()
+        });
+        return *this;
+    }
+
+    range_capture& range_capture::optional_capture_range(const cstring& from, const cstring& to, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::optional_match_range,
+            .match_tokens = {from, to},
+            .skip_count = 0,
+            .key = key,
+            .previous_key = cstring::empty()
         });
         return *this;
     }
@@ -90,23 +140,42 @@ namespace shade {
             .type = instruction_type::match_range,
             .match_tokens = {from, to},
             .skip_count = 0,
-            .key = key
+            .key = key,
+            .previous_key = cstring::empty()
         });
+        return *this;
+    }
+
+    range_capture& range_capture::optional_take_until_if_previous_key(const cstring& previous_key, const cstring& until_token, const cstring& key) {
+        _parse_instructions.push_back({
+            .type = instruction_type::optional_take_until_if_previous_key,
+            .match_tokens = {until_token},
+            .skip_count = 0,
+            .key = key,
+            .previous_key = previous_key
+        });
+
+        return *this;
+    }
+
+    range_capture& range_capture::set_type(const cstring& type_key) {
+        capture_type_key = type_key;
         return *this;
     }
 
     capture_results range_capture::try_capture(const std::vector<language_token>& tokens, size_t from_index, size_t to_index) const {
         capture_results results;
+        results.type_key = capture_type_key;
 
         if (from_index > to_index) {
             results.failure_message = "Invalid range: from_index must be less than to_index";
-            results.matched = false;
+            results.matched         = false;
             return results;
         }
 
         if (from_index >= tokens.size() || to_index > tokens.size()) {
             results.failure_message = "Invalid range: from_index or to_index is out of bounds";
-            results.matched = false;
+            results.matched         = false;
             return results;
         }
 
@@ -122,13 +191,22 @@ namespace shade {
 
             if (current_token_index > to_index) {
                 results.failure_message = "Range not found within tokens.";
-                matched = false;
+                matched                 = false;
                 break;
             }
 
             bool stop_iterating = false;
 
             switch (instruction.type) {
+                case instruction_type::optional_match_single:
+                    {
+                        if (contains_token(tokens[current_token_index].text, instruction.match_tokens)) {
+                            results.add_captured_range(current_token_index, current_token_index, instruction.key);
+                            matched = true;
+                        } else {
+                            continue;
+                        }
+                    }
                 case instruction_type::match_single:
                     {
                         if (contains_token(tokens[current_token_index].text, instruction.match_tokens)) {
@@ -136,7 +214,7 @@ namespace shade {
                             matched = true;
                         } else {
                             results.failure_message = "Failed to match single token.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
                         current_token_index++;
@@ -150,18 +228,35 @@ namespace shade {
                             matched = true;
                         } else {
                             results.failure_message = "Failed to match any of the specified tokens.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
                         current_token_index++;
 
                     }
                     break;
+                case instruction_type::optional_match_range:
+                    {
+                        if (!(instruction.match_tokens.size() == 2)) {
+                            results.failure_message = "Invalid range capture instruction.";
+                            matched                 = false;
+                            break;
+                        }
+
+                        auto from_token = instruction.match_tokens.at(0);
+                        auto to_token   = instruction.match_tokens.at(1);
+
+                        if (tokens[current_token_index].text != from_token) {
+                            continue;
+                        }
+                    }
+                //we faill through on purpose so we don't have to duplicate
+                //the range logic.
                 case instruction_type::match_range:
                     {
                         if (!(instruction.match_tokens.size() == 2)) {
                             results.failure_message = "Invalid range capture instruction.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
 
@@ -170,7 +265,7 @@ namespace shade {
 
                         if (tokens[current_token_index].text != from_token) {
                             results.failure_message = "Did not find expected opening token at start of range.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
 
@@ -194,6 +289,7 @@ namespace shade {
                         }
 
                         results.add_captured_range(start_token_index, current_token_index, instruction.key);
+                        current_token_index++;
                         matched = true;
                     }
                     break;
@@ -202,7 +298,7 @@ namespace shade {
                         //we are doing a -1 correction because we are including the token at the current index
                         if ((current_token_index + instruction.skip_count - 1) > to_index) {
                             results.failure_message = "Skipped beyond token range.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
 
@@ -221,14 +317,14 @@ namespace shade {
 
                             if (current_token_index > to_index) {
                                 results.failure_message = "Range not found within tokens.";
-                                matched = false;
+                                matched                 = false;
                                 break;
                             }
 
                             matched = true;
                         } else {
                             stop_iterating = true;
-                            matched = true;
+                            matched        = true;
                             break;
                         }
                     }
@@ -238,18 +334,37 @@ namespace shade {
                         //we are doing a -1 correction because we are including the token at the current index
                         if ((current_token_index + instruction.skip_count - 1) > to_index) {
                             results.failure_message = "Skipped beyond token range.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
                         current_token_index += instruction.skip_count;
-                        matched = true;
+                        matched             = true;
                     }
                     break;
+                case instruction_type::optional_take_until_if_previous_key:
+                    {
+                        auto result_size = results.get_size();
+                        if (result_size == 0) {
+                            continue;
+                        }
+
+                        auto previous = results.get_captured_range_at(result_size - 1);
+                        if (!previous) {
+                            continue;
+                        }
+
+                        auto previous_value = previous.value();
+
+                        if (previous_value.key != instruction.previous_key) {
+                            continue;
+                        }
+                    }
+                    //we purposefully fall through here to leverage the existing skip unit logic
                 case instruction_type::skip_until:
                     {
                         if (instruction.match_tokens.empty()) {
                             results.failure_message = "No tokens to skip until.";
-                            matched = false;
+                            matched                 = false;
                             break;
                         }
 
@@ -270,11 +385,15 @@ namespace shade {
 
                         if (!found) {
                             results.failure_message = "Range not found within tokens.";
-                            matched = false;
+                            matched                 = false;
                             break;
-                        }
+                        } else {
+                            matched = true;
 
-                        matched = true;
+                            if (instruction.type == instruction_type::optional_take_until_if_previous_key) {
+                                results.add_captured_range(start_token_index, current_token_index, instruction.key);
+                            }
+                        }
                     }
                     break;
                 case instruction_type::undefined:

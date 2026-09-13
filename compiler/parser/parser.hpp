@@ -17,10 +17,12 @@ namespace shade {
     class parser {
     private:
         compile_context & _context;
+        std::vector<capture_results> _code_map;
     public:
         parser(compile_context & context);
 
-        std::vector<capture_results> first_pass(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
+        std::vector<capture_results> & first_pass(const std::vector<language_token>& tokens, size_t from_token_index, size_t to_token_index);
+        void analyze_first_pass();
     };
 
 } // shade
