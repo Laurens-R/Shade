@@ -139,6 +139,9 @@ TEST(parser_analysis, functions) {
 
         func f4() {
         }
+
+        struct d {
+        }
     )";
 
     auto lex = shade::lexer(source, context);
@@ -153,10 +156,12 @@ TEST(parser_analysis, functions) {
     auto a_type = ps.get_type_definition("m::n::a");
     auto b_type = ps.get_type_definition("m::b");
     auto c_type = ps.get_type_definition("m::c");
+    auto d_type = ps.get_type_definition("d");
 
     ASSERT_NE(a_type, nullptr);
     ASSERT_NE(b_type, nullptr);
     ASSERT_NE(c_type, nullptr);
+    ASSERT_NE(d_type, nullptr);
 
     auto f1 = ps.get_function_definition("m::n::a::f1");
     auto f2 = ps.get_function_definition("m::c::f2");
