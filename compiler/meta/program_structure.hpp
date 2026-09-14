@@ -30,6 +30,10 @@ namespace shade {
 
             std::span<type_definition*> get_types();
 
+            std::span<function_definition*> get_functions();
+
+            std::span<module_definition*> get_modules();
+
             function_definition *add_function_to_module(const cstring &module_path, const function_definition &func);
 
             function_definition *add_function_to_type(const cstring &type_path, const function_definition &func);
@@ -51,6 +55,9 @@ namespace shade {
             module_definition *get_module_definition(const cstring &module_path);
 
             module_definition * get_global_module();
+
+
+
     };
 }
 

@@ -94,7 +94,12 @@ SET( LIB_SHADE_SOURCES
        compiler/meta/module_definition.hpp
        compiler/lang/path_utils.hpp
         compiler/parser/parser_range_keys.hpp
-        compiler/lang/path_utils.cpp)
+        compiler/lang/path_utils.cpp
+        compiler/parser/structparser.cpp
+        compiler/parser/structparser.hpp
+        compiler/parser/typeexpressionparser.cpp
+        compiler/parser/typeexpressionparser.hpp
+)
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
 target_include_directories(lib_shade PUBLIC compiler)

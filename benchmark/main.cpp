@@ -42,8 +42,8 @@ int main() {
         const auto tokens = lex.tokenize();
 
         auto parse = shade::parser(context, tokens);
-        auto parse_map = parse.first_pass();
-        parse.analyze_first_pass();
+        auto parse_map = parse.capture_main_areas();
+        parse.analyze_main_areas();
     });
 
 

@@ -104,7 +104,7 @@ namespace shade {
     parser::parser(compile_context &context, const std::vector<language_token> &tokens)
         : _context(context), _tokens(tokens) {}
 
-    static size_t process_body_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
+    static size_t process_statements(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
         auto &capture_methods = get_capture_methods();
 
         auto current_token_index = from_token_index;
@@ -118,7 +118,7 @@ namespace shade {
                 auto if_body_result = if_result.get_captured_range(range_keys::if_body);
                 if (if_body_result) {
                     auto &if_body = if_body_result.value();
-                    process_body_map(tokens, if_body.from_token_index + 1, if_body.to_token_index - 1, if_result.child_results);
+                    process_statements(tokens, if_body.from_token_index + 1, if_body.to_token_index - 1, if_result.child_results);
                 }
                 results.push_back(if_result);
                 current_token_index = if_result.range_to_index;
@@ -132,7 +132,7 @@ namespace shade {
                     auto if_else_body_result = if_else_result.get_captured_range(range_keys::if_else_body);
                     if (if_else_body_result) {
                         auto &if_else_body = if_else_body_result.value();
-                        process_body_map(tokens, if_else_body.from_token_index + 1, if_else_body.to_token_index - 1, if_else_result.child_results);
+                        process_statements(tokens, if_else_body.from_token_index + 1, if_else_body.to_token_index - 1, if_else_result.child_results);
                     }
 
                     results.push_back(if_else_result);
@@ -144,7 +144,7 @@ namespace shade {
                     auto else_body_result = else_result.get_captured_range(range_keys::else_body);
                     if (else_body_result) {
                         auto &else_body = else_body_result.value();
-                        process_body_map(tokens, else_body.from_token_index + 1, else_body.to_token_index - 1, else_result.child_results);
+                        process_statements(tokens, else_body.from_token_index + 1, else_body.to_token_index - 1, else_result.child_results);
                     }
 
                     results.push_back(else_result);
@@ -162,7 +162,7 @@ namespace shade {
                 auto for_body_result = for_result.get_captured_range(range_keys::for_loop_body);
                 if (for_body_result) {
                     auto &for_body = for_body_result.value();
-                    process_body_map(tokens, for_body.from_token_index + 1, for_body.to_token_index - 1, for_result.child_results);
+                    process_statements(tokens, for_body.from_token_index + 1, for_body.to_token_index - 1, for_result.child_results);
                 }
 
                 results.push_back(for_result);
@@ -179,7 +179,7 @@ namespace shade {
                 auto while_body_result = while_result.get_captured_range(range_keys::while_loop_body);
                 if (while_body_result) {
                     auto &while_body = while_body_result.value();
-                    process_body_map(tokens, while_body.from_token_index + 1, while_body.to_token_index - 1, while_result.child_results);
+                    process_statements(tokens, while_body.from_token_index + 1, while_body.to_token_index - 1, while_result.child_results);
                 }
 
                 results.push_back(while_result);
@@ -215,14 +215,14 @@ namespace shade {
                 auto function_body_result = function_result.get_captured_range(range_keys::function_body);
                 if (function_body_result) {
                     auto &module_body = function_body_result.value();
-                    process_body_map(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
+                    process_statements(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
                 }
                 results.push_back(function_result);
                 current_token_index = function_result.range_to_index + 1;
                 continue;
             }
 
-            current_token_index = process_body_map(tokens, current_token_index, to_token_index, results);
+            current_token_index = process_statements(tokens, current_token_index, to_token_index, results);
 
             current_token_index++;
         }
@@ -285,20 +285,20 @@ namespace shade {
                 auto function_body_result = function_result.get_captured_range(range_keys::function_body);
                 if (function_body_result) {
                     auto &module_body = function_body_result.value();
-                    process_body_map(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
+                    process_statements(tokens, module_body.from_token_index + 1, module_body.to_token_index - 1, function_result.child_results);
                 }
                 results.push_back(function_result);
                 current_token_index = function_result.range_to_index;
                 continue;
             }
 
-            current_token_index = process_body_map(tokens, current_token_index, to_token_index, results);
+            current_token_index = process_statements(tokens, current_token_index, to_token_index, results);
 
             current_token_index++;
         }
     }
 
-    std::vector<capture_results> &parser::first_pass() {
+    std::vector<capture_results> &parser::capture_main_areas() {
         _code_map.clear();
         generate_parse_map(_tokens, 0, _tokens.size() - 1, _code_map);
         return _code_map;
@@ -402,7 +402,7 @@ namespace shade {
         }
     }
 
-    void parser::analyze_first_pass() {
+    void parser::analyze_main_areas() {
         auto &ps = _context.get_program_structure();
         analyze_map(_code_map, _tokens, _context, nullptr, ps.get_global_module());
     }

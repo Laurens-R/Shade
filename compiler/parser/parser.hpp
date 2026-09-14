@@ -15,17 +15,19 @@
 
 namespace shade {
     class parser {
-    private:
-        compile_context & _context;
-        std::vector<capture_results> _code_map;
-        const std::vector<language_token>& _tokens;
-    public:
-        parser(compile_context & context, const std::vector<language_token>& tokens);
+        private:
+            compile_context &_context;
+            std::vector<capture_results> _code_map;
+            const std::vector<language_token> &_tokens;
 
-        std::vector<capture_results> & first_pass();
-        void analyze_first_pass();
+        public:
+            parser(compile_context &context, const std::vector<language_token> &tokens);
+
+            std::vector<capture_results> &capture_main_areas();
+            void analyze_main_areas();
+
+
     };
-
 } // shade
 
 #endif //SHADE_PARSER_H

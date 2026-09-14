@@ -15,11 +15,12 @@
 namespace shade
 {
     struct type_definition;
+    struct type_expression;
 
     struct function_argument
     {
         cstring name;
-        type_definition* type;
+        type_expression* type;
     };
 
     class ast_node;

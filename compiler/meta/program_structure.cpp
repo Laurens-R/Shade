@@ -29,6 +29,14 @@ namespace shade {
         return _registered_types;
     }
 
+    std::span<function_definition *> program_structure::get_functions() {
+        return _registered_functions;
+    }
+
+    std::span<module_definition *> program_structure::get_modules() {
+        return _registered_modules;
+    }
+
     module_definition *program_structure::add_module_definition(const cstring &name) {
         if (_registered_module_mapping.contains(name.to_c_string())) {
             throw compiler_exception("Module already defined.");

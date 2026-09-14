@@ -27,9 +27,9 @@ TEST(parser_analysis, top_level_first_pass) {
     const auto tokens = lex.tokenize();
 
     auto parse = shade::parser(context, tokens);
-    auto parse_map = parse.first_pass();
+    auto parse_map = parse.capture_main_areas();
 
-    parse.analyze_first_pass();
+    parse.analyze_main_areas();
 
     auto & ps = context.get_program_structure();
     auto a_type = ps.get_type_definition("a");
@@ -61,9 +61,9 @@ TEST(parser_analysis, inside_of_module) {
     const auto tokens = lex.tokenize();
 
     auto parse = shade::parser(context, tokens);
-    auto parse_map = parse.first_pass();
+    auto parse_map = parse.capture_main_areas();
 
-    parse.analyze_first_pass();
+    parse.analyze_main_areas();
 
     auto & ps = context.get_program_structure();
     auto a_type = ps.get_type_definition("m::a");
@@ -98,9 +98,9 @@ TEST(parser_analysis, inside_of_module_mixed) {
     const auto tokens = lex.tokenize();
 
     auto parse = shade::parser(context, tokens);
-    auto parse_map = parse.first_pass();
+    auto parse_map = parse.capture_main_areas();
 
-    parse.analyze_first_pass();
+    parse.analyze_main_areas();
 
     auto & ps = context.get_program_structure();
     auto a_type = ps.get_type_definition("m::n::a");
@@ -148,9 +148,9 @@ TEST(parser_analysis, functions) {
     const auto tokens = lex.tokenize();
 
     auto parse = shade::parser(context, tokens);
-    auto parse_map = parse.first_pass();
+    auto parse_map = parse.capture_main_areas();
 
-    parse.analyze_first_pass();
+    parse.analyze_main_areas();
 
     auto & ps = context.get_program_structure();
     auto a_type = ps.get_type_definition("m::n::a");

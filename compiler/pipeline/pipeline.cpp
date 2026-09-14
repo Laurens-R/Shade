@@ -27,11 +27,11 @@ namespace shade {
         auto parser = shade::parser(context, tokens);
 
         //first parse pass: get a overall code map by an initial parse of all the source sections
-        parser.first_pass();
+        parser.capture_main_areas();
 
         //second parse pass: scan through the map to register all found types (structs) this will allow us to resolve type references
         //without requiring source-order declarations during the in-depth parse pass
-        parser.analyze_first_pass();
+        parser.analyze_main_areas();
 
         //phase 4: optimize AST
 

@@ -67,15 +67,11 @@ namespace shade {
         ast_node *related_node = nullptr;
         module_definition *related_module = nullptr;
         capture_results * related_token_capture = nullptr;
-        uint64_t fixed_array_size = 0;
         uint8_t alignment = sizeof(uintptr_t);
         bool is_primitive = false;
-        bool is_const = false;
         bool is_struct = false;
         bool is_enum = false;
         bool is_generic_type = false;
-        bool is_array = false;
-        bool is_dynamic_array = false;
 
         ~type_definition() = default;
 
@@ -98,6 +94,16 @@ namespace shade {
         static type_definition create_struct(const cstring &full_path, ast_node *related_node = nullptr, size_t alignment = sizeof(uintptr_t));
 
         metadata_type get_type() override;
+    };
+
+    struct type_expression {
+        type_definition *type = nullptr;
+        uint64_t fixed_array_size = 0;
+        bool is_const = false;
+        bool is_array = false;
+        bool is_ptr = false;
+        bool is_ref = false;
+        bool is_dynamic_array = false;
     };
 }
 
