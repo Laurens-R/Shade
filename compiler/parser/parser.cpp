@@ -89,8 +89,8 @@ namespace shade {
             raw_scope_range.capture_range(spelling::scopes::begin_body, spelling::scopes::end_body, range_keys::raw_scope)
                            .set_type(range_keys::raw_type_key);
 
-            statement_range.skip_token_until(spelling::actions::end_of_statement)
-                           .set_type(range_keys::generic_type_key);
+            statement_range.take_token_until(spelling::actions::end_of_statement, range_keys::statement_expression)
+                           .set_type(range_keys::statement_type_key);
 
             are_ranges_initialized = true;
         }

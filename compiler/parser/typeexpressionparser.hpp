@@ -13,7 +13,7 @@ namespace shade {
         public:
             type_expression_parser();
 
-            type_expression parse(const captured_range & token_range, const std::vector<language_token> & tokens, compile_context & context);
+            type_expression parse(const captured_range & token_range, const std::vector<language_token> & tokens, compile_context & context, const cstring & current_namespace);
     };
 }
 

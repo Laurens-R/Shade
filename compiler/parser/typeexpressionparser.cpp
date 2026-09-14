@@ -17,10 +17,11 @@ namespace shade {
         _capture.optional_capture_range("[", "]", "array range");
     }
 
-    type_expression type_expression_parser::parse(const captured_range &token_range, const std::vector<language_token> &tokens, compile_context & context) {
+    type_expression type_expression_parser::parse(const captured_range &token_range, const std::vector<language_token> &tokens, compile_context & context, const cstring & current_namespace) {
         type_expression result;
 
-
+        //note: I expect we only have to pass the namespace for the module. types are only known at the global or nested module level. You can't have seperate types in
+        //structs/types.
 
         return result;
     }

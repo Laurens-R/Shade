@@ -60,6 +60,9 @@ namespace shade {
 
         static inline const char * raw_type_key = "raw";
         static inline const char * raw_scope = "raw_scope";
+
+        static inline const char * statement_type_key = "statement";
+        static inline const char * statement_expression = "statement_expression";
     };
 }
 
