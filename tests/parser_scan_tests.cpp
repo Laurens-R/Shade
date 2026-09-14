@@ -120,7 +120,7 @@ TEST(parser_analysis, functions) {
 
             module n {
                 struct a {
-                    func f1 () {
+                    func f1<templated>() {
                     }
                 }
             }
@@ -129,7 +129,7 @@ TEST(parser_analysis, functions) {
             }
 
             struct c {
-                func f2 () {
+                func f2 () -> i32 {
                 }
             }
 

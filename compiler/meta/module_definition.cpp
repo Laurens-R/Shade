@@ -217,7 +217,7 @@ namespace shade {
         auto added_type = &found_module->_child_types.back();
         added_type->related_module = found_module;
         added_type->module_path = found_module->full_path;
-        added_type->full_path = found_module->full_path + spelling::modules::module_seperator + type.name;
+        added_type->full_path = path_utils::remove_global_prefix(found_module->full_path + spelling::modules::module_seperator + type.name);
         return added_type;
     }
 
@@ -241,7 +241,6 @@ namespace shade {
             found_module->_child_functions.emplace_back(func);
             added_function = &found_module->_child_functions.back();
             added_function->parent_path = found_module->full_path;
-
             added_function->full_path = path_utils::remove_global_prefix(found_module->full_path + spelling::modules::module_seperator + func.name);
         } else {
             //else we add the function to the type

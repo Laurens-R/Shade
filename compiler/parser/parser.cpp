@@ -317,7 +317,7 @@ namespace shade {
                     auto name = original_token.text;
 
                     if (parent_module != nullptr) {
-                        name = parent_module->full_path + spelling::modules::module_seperator + name;
+                        name = path_utils::remove_global_prefix(parent_module->full_path + spelling::modules::module_seperator + name);
                     }
 
                     if (program_structure.contains_type_definition(name)) {
