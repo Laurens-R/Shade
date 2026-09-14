@@ -10,6 +10,8 @@
 #include "../meta/module_definition.hpp"
 #include "../meta/function_definition.hpp"
 
+//todo: refactor file
+
 namespace shade {
     struct capture_methods {
         range_capture attribute_range;

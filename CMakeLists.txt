@@ -99,6 +99,7 @@ SET( LIB_SHADE_SOURCES
         compiler/parser/structparser.hpp
         compiler/parser/typeexpressionparser.cpp
         compiler/parser/typeexpressionparser.hpp
+        compiler/parser/parser_type_expression_keys.hpp
 )
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
