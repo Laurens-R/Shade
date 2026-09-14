@@ -30,17 +30,25 @@ namespace shade {
 
             std::span<type_definition*> get_types();
 
-            module_definition *add_module(const cstring &name);
-
             function_definition *add_function_to_module(const cstring &module_path, const function_definition &func);
 
             function_definition *add_function_to_type(const cstring &type_path, const function_definition &func);
 
-            bool add_typeinformation(const type_definition &typeinfo);
+            module_definition *add_module_definition(const cstring &name);
 
-            bool contains_typeinformation(const cstring &type_path);
+            type_definition *add_type_definition(const type_definition &typeinfo);
 
-            type_definition *get_typeinformation(const cstring &type_path);
+            bool contains_type_definition(const cstring &type_path);
+
+            bool contains_function_definition(const cstring &function_path);
+
+            bool contains_module_definition(const cstring &module_path);
+
+            type_definition *get_type_definition(const cstring &type_path);
+
+            function_definition *get_function_definition(const cstring &function_path);
+
+            module_definition *get_module_definition(const cstring &module_path);
 
             module_definition * get_global_module();
     };

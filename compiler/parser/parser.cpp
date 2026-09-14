@@ -304,8 +304,8 @@ namespace shade {
         return _code_map;
     }
 
-    static void analyze_map(std::vector<capture_results> &captured_information, const std::vector<language_token> &tokens, compile_context &context, capture_results *parent = nullptr, module_definition *parent_module = nullptr) {
-        auto &type_index = context.get_type_index();
+    static void analyze_map(std::vector<capture_results> &captured_information, const std::vector<language_token> &tokens, compile_context &context, capture_results *parent = nullptr, module_definition *parent_module = nullptr, type_definition * parent_type = nullptr) {
+        auto &program_structure = context.get_program_structure();
 
         for (auto &result: captured_information) {
             if (result.type_key == range_keys::struct_type_key) {
@@ -320,14 +320,16 @@ namespace shade {
                         name = parent_module->full_path + spelling::modules::module_seperator + name;
                     }
 
-                    if (type_index.contains_typeinformation(name)) {
+                    if (program_structure.contains_type_definition(name)) {
                         context.log_error(original_token.line, original_token.column, "Struct with name already exists.");
                         return;
                     }
 
                     auto new_type = type_definition::create_struct(name, nullptr);
-                    new_type.related_token_capture = &result;
-                    type_index.add_typeinformation(new_type);
+                    auto added_type = program_structure.add_type_definition(new_type);
+                    added_type->related_token_capture = &result;
+
+                    analyze_map(result.child_results, tokens, context, &result, parent_module, added_type);;
                 } else {
                     auto &original_token = tokens[result.range_from_index];
                     context.log_error(original_token.line, original_token.column, "Error during parsing of struct.");
@@ -339,17 +341,17 @@ namespace shade {
 
                 if (module_result) {
                     auto &module_name = tokens[module_result.value().from_token_index].text;
-                    module_definition *created_module = nullptr;
+                    module_definition *added_module = nullptr;
 
-                    if (!parent_module) {
-                        created_module = type_index.add_module(module_name);
+                    if (parent_module == program_structure.get_global_module()) {
+                        added_module = program_structure.add_module_definition(module_name);
                     } else {
                         auto full_path = parent_module->full_path + spelling::modules::module_seperator + module_name;
-                        created_module = type_index.add_module(full_path);
+                        added_module = program_structure.add_module_definition(full_path);
                     }
 
-                    created_module->related_token_capture = &result;
-                    analyze_map(result.child_results, tokens, context, &result, created_module);
+                    added_module->related_token_capture = &result;
+                    analyze_map(result.child_results, tokens, context, &result, added_module);
                 }
             }
 
@@ -361,26 +363,38 @@ namespace shade {
 
                     function_definition *created_function = nullptr;
 
-                    if (parent == nullptr) continue;
                     if (parent_module == nullptr) continue;
 
-                    if (parent->type_key == range_keys::module_type_key) {
-                        cstring full_function_name = parent_module->full_path + spelling::modules::module_seperator + function_name;
+                    //parent could be null in case we have a function definition in the global scope
+                    if (parent == nullptr || parent->type_key == range_keys::module_type_key) {
+                        //it's a function in a module or the global scope!
+                        cstring full_function_name = cstring::empty();
+
+                        //if the parent module has no path, then it's a global module.
+                        if (parent_module->full_path == cstring::empty()) {
+                            full_function_name = function_name;
+                        } else {
+                            full_function_name = parent_module->full_path + spelling::modules::module_seperator + function_name;
+                        }
+
                         function_definition func_def = function_definition::create(full_function_name, false);
                         func_def.related_token_capture = &result;
-                        type_index.add_function_to_module(parent_module->full_path, func_def);
+                        auto added_function = program_structure.add_function_to_module(parent_module->full_path, func_def);
+                        added_function->related_token_capture = &result;
                     } else if (parent->type_key == range_keys::struct_type_key) {
-                        auto struct_result = result.get_captured_range(range_keys::struct_name);
+                        //it's a function/method in a struct!
+                        auto struct_result = parent->get_captured_range(range_keys::struct_name);
 
                         if (struct_result) {
                             auto &struct_information = struct_result.value();
                             auto &original_struct_token = tokens[struct_information.from_token_index];
-                            auto struct_full_path = parent_module->full_path + spelling::modules::module_seperator + original_struct_token.text;
+                            auto struct_full_path = parent_type->full_path;
                             auto full_function_name = struct_full_path + spelling::modules::module_seperator + function_name;
 
                             function_definition func_def = function_definition::create(full_function_name, true);
                             func_def.related_token_capture = &result;
-                            type_index.add_function_to_type(struct_full_path, func_def);
+                            auto added_function = program_structure.add_function_to_type(struct_full_path, func_def);
+                            added_function->related_token_capture = &result;
                         }
                     }
                 }
@@ -389,7 +403,7 @@ namespace shade {
     }
 
     void parser::analyze_first_pass() {
-        auto &type_index = _context.get_type_index();
-        analyze_map(_code_map, _tokens, _context, nullptr, nullptr);
+        auto &ps = _context.get_program_structure();
+        analyze_map(_code_map, _tokens, _context, nullptr, ps.get_global_module());
     }
 } // shade

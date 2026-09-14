@@ -35,7 +35,9 @@ namespace shade {
     }
 
     module_definition *module_definition::find_namespace(const cstring &path) {
-        if (path.is_empty()) return nullptr;
+        if (path.is_empty()) {
+            return this;
+        }
 
         module_definition *current_module = this;
         auto path_parts = path_utils::get_parts_from_path(path);
@@ -96,7 +98,7 @@ namespace shade {
 
         module_definition * found_module = this;
 
-        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_absolute_path(parent_namespace);
             if (found_module == nullptr) return nullptr;
@@ -114,7 +116,7 @@ namespace shade {
     type_definition * module_definition::find_type_by_relative_path(const cstring &path) {
         module_definition * found_module = this;
 
-        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_relative_path(parent_namespace);
             if (found_module == nullptr) return nullptr;
@@ -132,17 +134,31 @@ namespace shade {
     function_definition * module_definition::find_function_by_absolute_path(const cstring &path) {
         if (_parent_module != nullptr) return _parent_module->find_function_by_absolute_path(path);
 
-        module_definition * found_module = this;
+        module_definition * found_module = nullptr;
+        type_definition * found_type = nullptr;
 
-        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_absolute_path(parent_namespace);
-            if (found_module == nullptr) return nullptr;
+            if (found_module == nullptr) {
+                found_type = find_type_by_absolute_path(parent_namespace);
+                if (found_type == nullptr) {
+                    return nullptr;
+                }
+            }
         }
 
-        for (auto &child_function : found_module->_child_functions) {
-            if (child_function.full_path == path) {
-                return &child_function;
+        if (found_module != nullptr) {
+            for (auto &child_function : found_module->_child_functions) {
+                if (child_function.full_path == path) {
+                    return &child_function;
+                }
+            }
+        } else if (found_type != nullptr) {
+            for (auto &child_method : found_type->methods) {
+                if (child_method.full_path == path) {
+                    return &child_method;
+                }
             }
         }
 
@@ -152,7 +168,7 @@ namespace shade {
     function_definition * module_definition::find_function_by_relative_path(const cstring &path) {
         module_definition * found_module = this;
 
-        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_relative_path(parent_namespace);
             if (found_module == nullptr) return nullptr;
@@ -169,7 +185,7 @@ namespace shade {
 
     module_definition *module_definition::add_child_module(const cstring &full_module_path) {
 
-        auto module_path = path_utils::get_namespace_from_path(full_module_path);
+        auto module_path = path_utils::get_parent_namespace_from_path(full_module_path);
 
         if (!module_path.is_empty()) {
             auto found_parent_module = find_namespace_by_absolute_path(module_path);
@@ -194,20 +210,49 @@ namespace shade {
     }
 
     type_definition * module_definition::add_child_type(const type_definition &type) {
-        _child_types.emplace_back(type);
-        auto added_module = &_child_types.back();
-        added_module->related_module = this;
-        added_module->module_path = full_path;
-        added_module->full_path = full_path + spelling::modules::module_seperator + type.name;
-        return added_module;
+        auto module_path = type.module_path;
+        auto found_module = find_namespace_by_absolute_path(module_path);
+
+        found_module->_child_types.emplace_back(type);
+        auto added_type = &found_module->_child_types.back();
+        added_type->related_module = found_module;
+        added_type->module_path = found_module->full_path;
+        added_type->full_path = found_module->full_path + spelling::modules::module_seperator + type.name;
+        return added_type;
     }
 
     function_definition * module_definition::add_child_function(const function_definition &func) {
-        _child_functions.emplace_back(func);
-        auto added_function = &_child_functions.back();
-        added_function->related_module = this;
-        added_function->module_path = full_path;
-        added_function->full_path = full_path + spelling::modules::module_seperator + func.name;
+        module_definition * found_module = nullptr;
+        type_definition * found_type = nullptr;
+
+        if (func.is_method) {
+            auto module_path = path_utils::get_parent_namespace_from_path(func.parent_path);
+            found_module = find_namespace_by_absolute_path(module_path);
+            found_type = find_type_by_absolute_path(func.parent_path);
+        } else {
+            auto module_path = func.parent_path;
+            found_module = find_namespace_by_absolute_path(module_path);
+        }
+
+        function_definition * added_function = nullptr;
+
+        if (found_type == nullptr) {
+            //if there is no found type, we add the function to the module
+            found_module->_child_functions.emplace_back(func);
+            added_function = &found_module->_child_functions.back();
+            added_function->parent_path = found_module->full_path;
+
+            added_function->full_path = path_utils::remove_global_prefix(found_module->full_path + spelling::modules::module_seperator + func.name);
+        } else {
+            //else we add the function to the type
+            found_type->methods.emplace_back(func);
+            added_function = &found_type->methods.back();
+            added_function->parent_path = found_type->full_path;
+            added_function->full_path = found_type->full_path + spelling::modules::module_seperator + func.name;
+        }
+
+        added_function->related_module = found_module;
+
         return added_function;
     }
 } // shade

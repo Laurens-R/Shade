@@ -27,7 +27,7 @@ namespace shade {
 
             static cstring get_object_from_path(const cstring &full_path);
 
-            static cstring get_namespace_from_path(const cstring & full_path);
+            static cstring get_parent_namespace_from_path(const cstring & full_path);
 
             static cstring get_global_path();
     };

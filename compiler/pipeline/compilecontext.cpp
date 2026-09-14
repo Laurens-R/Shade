@@ -26,7 +26,7 @@ namespace shade {
         return _lookup_paths;
     }
 
-    program_structure & compile_context::get_type_index()
+    program_structure & compile_context::get_program_structure()
     {
         return _types;
     }

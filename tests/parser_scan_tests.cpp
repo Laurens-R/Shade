@@ -31,10 +31,10 @@ TEST(parser_analysis, top_level_first_pass) {
 
     parse.analyze_first_pass();
 
-    auto & types = context.get_type_index();
-    auto a_type = types.get_typeinformation("a");
-    auto b_type = types.get_typeinformation("b");
-    auto c_type = types.get_typeinformation("c");
+    auto & ps = context.get_program_structure();
+    auto a_type = ps.get_type_definition("a");
+    auto b_type = ps.get_type_definition("b");
+    auto c_type = ps.get_type_definition("c");
 
     ASSERT_NE(a_type, nullptr);
     ASSERT_NE(b_type, nullptr);
@@ -65,10 +65,10 @@ TEST(parser_analysis, inside_of_module) {
 
     parse.analyze_first_pass();
 
-    auto & types = context.get_type_index();
-    auto a_type = types.get_typeinformation("m::a");
-    auto b_type = types.get_typeinformation("m::b");
-    auto c_type = types.get_typeinformation("m::c");
+    auto & ps = context.get_program_structure();
+    auto a_type = ps.get_type_definition("m::a");
+    auto b_type = ps.get_type_definition("m::b");
+    auto c_type = ps.get_type_definition("m::c");
 
     ASSERT_NE(a_type, nullptr);
     ASSERT_NE(b_type, nullptr);
@@ -102,10 +102,10 @@ TEST(parser_analysis, inside_of_module_mixed) {
 
     parse.analyze_first_pass();
 
-    auto & types = context.get_type_index();
-    auto a_type = types.get_typeinformation("m::n::a");
-    auto b_type = types.get_typeinformation("m::b");
-    auto c_type = types.get_typeinformation("m::c");
+    auto & ps = context.get_program_structure();
+    auto a_type = ps.get_type_definition("m::n::a");
+    auto b_type = ps.get_type_definition("m::b");
+    auto c_type = ps.get_type_definition("m::c");
 
     ASSERT_NE(a_type, nullptr);
     ASSERT_NE(b_type, nullptr);
@@ -120,6 +120,8 @@ TEST(parser_analysis, functions) {
 
             module n {
                 struct a {
+                    func f1 () {
+                    }
                 }
             }
 
@@ -127,7 +129,15 @@ TEST(parser_analysis, functions) {
             }
 
             struct c {
+                func f2 () {
+                }
             }
+
+            func f3() {
+            }
+        }
+
+        func f4() {
         }
     )";
 
@@ -139,12 +149,22 @@ TEST(parser_analysis, functions) {
 
     parse.analyze_first_pass();
 
-    auto & types = context.get_type_index();
-    auto a_type = types.get_typeinformation("m::n::a");
-    auto b_type = types.get_typeinformation("m::b");
-    auto c_type = types.get_typeinformation("m::c");
+    auto & ps = context.get_program_structure();
+    auto a_type = ps.get_type_definition("m::n::a");
+    auto b_type = ps.get_type_definition("m::b");
+    auto c_type = ps.get_type_definition("m::c");
 
     ASSERT_NE(a_type, nullptr);
     ASSERT_NE(b_type, nullptr);
     ASSERT_NE(c_type, nullptr);
+
+    auto f1 = ps.get_function_definition("m::n::a::f1");
+    auto f2 = ps.get_function_definition("m::c::f2");
+    auto f3 = ps.get_function_definition("m::f3");
+    auto f4 = ps.get_function_definition("f4");
+
+    ASSERT_NE(f1, nullptr);
+    ASSERT_NE(f2, nullptr);
+    ASSERT_NE(f3, nullptr);
+    ASSERT_NE(f4, nullptr);
 }

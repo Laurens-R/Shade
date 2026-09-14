@@ -95,7 +95,7 @@ namespace shade {
 
         static type_definition get_for_primitive_type(primitive_types primitive_type);
 
-        static type_definition create_struct(const cstring &full_path, ast_node *related_node, size_t alignment = sizeof(uintptr_t));
+        static type_definition create_struct(const cstring &full_path, ast_node *related_node = nullptr, size_t alignment = sizeof(uintptr_t));
 
         metadata_type get_type() override;
     };

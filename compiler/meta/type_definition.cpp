@@ -121,7 +121,7 @@ namespace shade {
         added_method->related_type = this;
         added_method->full_path = full_path + spelling::modules::module_seperator + added_method->name;
         added_method->related_module = related_module;
-        added_method->module_path = related_module->full_path;
+        added_method->parent_path = related_module->full_path;
         return added_method;
     }
 
@@ -216,7 +216,7 @@ namespace shade {
 
         result.name         = path_utils::get_object_from_path(full_path);
         result.full_path    = full_path;
-        result.module_path  = path_utils::get_namespace_from_path(full_path);
+        result.module_path  = path_utils::get_parent_namespace_from_path(full_path);
         result.is_struct    = true;
         result.alignment    = alignment;
         result.related_node = related_node;

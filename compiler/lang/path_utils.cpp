@@ -54,7 +54,7 @@ namespace shade {
         return cstring::empty();
     }
 
-    cstring path_utils::get_namespace_from_path(const cstring &full_path) {
+    cstring path_utils::get_parent_namespace_from_path(const cstring &full_path) {
         auto path_parts = get_parts_from_path(full_path);
 
         if (path_parts.size() <= 1) {

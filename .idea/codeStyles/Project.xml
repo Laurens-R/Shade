@@ -131,7 +131,6 @@
     <files>
       <extensions>
         <pair source="cpp" header="hpp" fileNamingConvention="LOWERCASE" />
-        <pair source="c" header="h" fileNamingConvention="LOWERCASE" />
         <pair source="cu" header="cuh" fileNamingConvention="LOWERCASE" />
         <pair source="ixx" header="" fileNamingConvention="NONE" />
         <pair source="mxx" header="" fileNamingConvention="NONE" />

@@ -32,7 +32,7 @@ namespace shade
         std::vector<attribute> attributes;
         cstring name;
         cstring full_path;
-        cstring module_path;
+        cstring parent_path;
 
         ast_node* related_node = nullptr;
         module_definition* related_module = nullptr;

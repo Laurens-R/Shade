@@ -18,7 +18,7 @@ namespace shade
 
         result.full_path = full_path;
         result.name = path_utils::get_object_from_path(full_path);
-        result.module_path = path_utils::get_namespace_from_path(full_path);
+        result.parent_path = path_utils::get_parent_namespace_from_path(full_path);
         result.is_method = is_method;
 
         return result;
