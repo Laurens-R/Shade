@@ -13,5 +13,9 @@ TEST(module_definition, find_namespace) {
     m2->add_child_module("d");
     m3->add_child_module("e");
 
-    auto found_module = m1.find_namespace("a::c::e");
+    auto found_module = m1.find_namespace_by_absolute_path("a::c::e");
+
+    ASSERT_NE(found_module, nullptr);
+    ASSERT_EQ(found_module->full_path, "a::c::e");
+    ASSERT_EQ(found_module->name, "e");
 }

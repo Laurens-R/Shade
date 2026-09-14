@@ -8,14 +8,13 @@
 #include <expected>
 #include <vector>
 
-#include "function.h"
+#include "function_definition.h"
 #include "metadata.h"
 
 #include "../utils/cstring.hpp"
 #include "../vendor/xxhash/xxhash.hpp"
 
 namespace shade {
-
     enum class primitive_types {
         boolean,
         i8,
@@ -40,9 +39,9 @@ namespace shade {
     struct type_information;
 
     struct type_field_definition {
-        cstring           name                     = cstring::empty();
+        cstring name = cstring::empty();
         type_information *related_type_information = {};
-        size_t            offset                   = 0;
+        size_t offset = 0;
     };
 
     enum class generics_error {
@@ -53,26 +52,30 @@ namespace shade {
     };
 
     class ast_node;
+    struct module_definition;
+    struct capture_results;
 
     struct type_information final : public metadata {
-        std::vector<cstring>               generics;
+        std::vector<cstring> generics;
         std::vector<type_field_definition> fields;
-        std::vector<function>              methods;
-        cstring                            name             = cstring::empty();
-        cstring                            module_path      = cstring::empty();
-        cstring                            full_path        = cstring::empty();
-        primitive_types                    primitive_type   = primitive_types::unknown;
-        reference_type                     reference_type   = reference_type::none;
-        ast_node *                         related_node     = nullptr;
-        uint64_t                           fixed_array_size = 0;
-        uint8_t                            alignment        = sizeof(uintptr_t);
-        bool                               is_primitive     = false;
-        bool                               is_const         = false;
-        bool                               is_struct        = false;
-        bool                               is_enum          = false;
-        bool                               is_generic_type  = false;
-        bool                               is_array         = false;
-        bool                               is_dynamic_array = false;
+        std::vector<function_definition> methods;
+        cstring name = cstring::empty();
+        cstring module_path = cstring::empty();
+        cstring full_path = cstring::empty();
+        primitive_types primitive_type = primitive_types::unknown;
+        reference_type reference_type = reference_type::none;
+        ast_node *related_node = nullptr;
+        module_definition *related_module = nullptr;
+        capture_results * related_token_capture = nullptr;
+        uint64_t fixed_array_size = 0;
+        uint8_t alignment = sizeof(uintptr_t);
+        bool is_primitive = false;
+        bool is_const = false;
+        bool is_struct = false;
+        bool is_enum = false;
+        bool is_generic_type = false;
+        bool is_array = false;
+        bool is_dynamic_array = false;
 
         ~type_information() = default;
 
@@ -86,7 +89,7 @@ namespace shade {
 
         void add_field(const cstring &field_name, type_information *type);
 
-        void add_method(const cstring &method_name, ast_node *related_node, type_information *return_type, const std::vector<function_argument> &arguments);
+        void add_method(const function_definition &func_def);
 
         std::expected<type_information, generics_error> monomorphize(const std::vector<type_information *> types);
 

@@ -7,9 +7,10 @@
 #include "range_capture.h"
 #include "../lang/spelling.hpp"
 #include "parser_range_keys.hpp"
+#include "../meta/module_definition.hpp"
+#include "../meta/function_definition.h"
 
 namespace shade {
-
     struct capture_methods {
         range_capture attribute_range;
         range_capture module_range;
@@ -230,7 +231,6 @@ namespace shade {
     }
 
     static void generate_parse_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
-
         //this can happen in case a passed down subscope is empty (e.g. a function with no body)
         //you want to call generate_parse_map with +1 from_token_index and -1 to_token_index to
         //ensure that you don't include the begin and end tokens of the subscope. However
@@ -239,11 +239,10 @@ namespace shade {
             return;
         }
 
-        auto &capture_methods     = get_capture_methods();
-        auto  current_token_index = from_token_index;
+        auto &capture_methods = get_capture_methods();
+        auto current_token_index = from_token_index;
 
         while (current_token_index <= to_token_index) {
-
             /*
              * Modules
              */
@@ -315,7 +314,7 @@ namespace shade {
                     auto &struct_information = struct_result.value();
 
                     auto &original_token = tokens[struct_information.from_token_index];
-                    auto  name           = original_token.text;
+                    auto name = original_token.text;
 
                     if (parent_module != nullptr) {
                         name = parent_module->full_path + spelling::modules::module_seperator + name;
@@ -327,6 +326,7 @@ namespace shade {
                     }
 
                     auto new_type = type_information::create_struct(name, nullptr);
+                    new_type.related_token_capture = &result;
                     type_index.add_typeinformation(new_type);
                 } else {
                     auto &original_token = tokens[result.range_from_index];
@@ -338,7 +338,7 @@ namespace shade {
                 auto module_result = result.get_captured_range((range_keys::module_name));
 
                 if (module_result) {
-                    auto &             module_name    = tokens[module_result.value().from_token_index].text;
+                    auto &module_name = tokens[module_result.value().from_token_index].text;
                     module_definition *created_module = nullptr;
 
                     if (!parent_module) {
@@ -347,7 +347,41 @@ namespace shade {
                         created_module = parent_module->add_child_module(module_name);
                     }
 
+                    created_module->related_token_capture = &result;
                     analyze_map(result.child_results, tokens, context, &result, created_module);
+                }
+            }
+
+            if (result.type_key == range_keys::function_type_key) {
+                auto function_result = result.get_captured_range((range_keys::function_name));
+
+                if (function_result) {
+                    auto &function_name = tokens[function_result.value().from_token_index].text;
+
+                    function_definition *created_function = nullptr;
+
+                    if (parent == nullptr) continue;
+                    if (parent_module == nullptr) continue;
+
+                    if (parent->type_key == range_keys::module_type_key) {
+                        cstring full_function_name = parent_module->full_path + spelling::modules::module_seperator + function_name;
+                        function_definition func_def = function_definition::create(full_function_name, false);
+                        func_def.related_token_capture = &result;
+                        type_index.add_function_to_module(parent_module->full_path, func_def);
+                    } else if (parent->type_key == range_keys::struct_type_key) {
+                        auto struct_result = result.get_captured_range(range_keys::struct_name);
+
+                        if (struct_result) {
+                            auto &struct_information = struct_result.value();
+                            auto &original_struct_token = tokens[struct_information.from_token_index];
+                            auto struct_name = parent_module->full_path + spelling::modules::module_seperator + original_struct_token.text;
+                            auto full_function_name = struct_name + spelling::modules::module_seperator + function_name;
+
+                            function_definition func_def = function_definition::create(full_function_name, true);
+                            func_def.related_token_capture = &result;
+                            type_index.add_function_to_struct(struct_name, func_def);
+                        }
+                    }
                 }
             }
         }
@@ -357,6 +391,4 @@ namespace shade {
         auto &type_index = _context.get_type_index();
         analyze_map(_code_map, _tokens, _context, nullptr, nullptr);
     }
-
-
 } // shade

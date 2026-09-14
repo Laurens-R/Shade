@@ -17,11 +17,11 @@ namespace shade
         return std::nullopt;
     }
 
-    std::optional<function*> ast_node::get_function_metadata(ast_node* parent)
+    std::optional<function_definition*> ast_node::get_function_metadata(ast_node* parent)
     {
         if (metadata && metadata->get_type() == metadata_type::function)
         {
-            return dynamic_cast<function*>(metadata.get());
+            return dynamic_cast<function_definition*>(metadata.get());
         }
 
         return std::nullopt;

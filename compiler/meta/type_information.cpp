@@ -115,18 +115,13 @@ namespace shade {
         });
     }
 
-    void type_information::add_method(const cstring& method_name, ast_node* related_node, type_information* return_type, const std::vector<function_argument>& arguments) {
-        function f;
-        f.name         = method_name;
-        f.is_method    = true;
-        f.return_type  = return_type;
-        f.related_node = related_node;
-
-        for (auto& argument : arguments) {
-            f.arguments.push_back(argument);
-        }
-
-        methods.push_back(f);
+    void type_information::add_method(const function_definition & func_def) {
+        methods.push_back(func_def);
+        auto added_method = &methods.back();
+        added_method->related_type = this;
+        added_method->full_path = full_path + spelling::modules::module_seperator + added_method->name;
+        added_method->related_module = related_module;
+        added_method->module_path = related_module->full_path;
     }
 
     bool type_information::are_fields_valid() const {
@@ -219,6 +214,7 @@ namespace shade {
 
         result.name         = namespace_path::get_type_from_path(full_path);
         result.full_path    = full_path;
+        result.module_path  = namespace_path::get_parent(full_path);
         result.is_struct    = true;
         result.alignment    = alignment;
         result.related_node = related_node;

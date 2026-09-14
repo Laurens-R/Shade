@@ -10,33 +10,116 @@ namespace shade {
     module_definition::module_definition()
         : _child_modules{std::make_unique<std::deque<module_definition> >()} {}
 
-    module_definition::module_definition(const cstring &module_name, const cstring &module_path)
-        : _child_modules{std::make_unique<std::deque<module_definition> >()}, name(module_name), full_path{module_path} {}
+    module_definition::module_definition(const cstring &module_name, const cstring &module_path, module_definition * parent)
+        : _child_modules{std::make_unique<std::deque<module_definition> >()}, name(module_name), full_path{module_path}, _parent_module{parent} {}
 
-    module_definition *module_definition::find_namespace(const cstring &namespace_path) {
-        if (namespace_path.is_empty()) return nullptr;
+    auto module_definition::begin() {
+        return _child_modules->begin();
+    }
 
-        if (namespace_path::is_part_of(namespace_path, full_path)) {
-            cstring relative_path   = namespace_path::get_relative_path(namespace_path, full_path);
-            auto    remaining_parts = namespace_path::get_parts(relative_path);
+    auto module_definition::end() {
+        return _child_modules->end();
+    }
 
-            if (remaining_parts.empty()) {
-                return nullptr;
+    auto module_definition::size()  {
+        return _child_modules->size();
+    }
+
+    module_definition *module_definition::find_namespace_by_absolute_path(const cstring & path) {
+        //first ensure we perform this function at the root module
+        if (_parent_module != nullptr) return _parent_module->module_definition::find_namespace_by_absolute_path(path);
+        return find_namespace(path);
+    }
+
+    module_definition *module_definition::find_namespace(const cstring &path) {
+        if (path.is_empty()) return nullptr;
+
+        module_definition *current_module = this;
+        auto path_parts = namespace_path::get_parts(path);
+
+        for (size_t current_depth = 0; current_depth < path_parts.size(); ++current_depth) {
+            for (auto & mod : *current_module) {
+                if (path_parts[current_depth] == mod.name) {
+                    current_module = &mod;
+                    break;
+                }
             }
 
-            auto &next_module = remaining_parts.front();
+            if (current_module->full_path == path) {
+                //success! We've found the correct module
+                return current_module;
+            }
 
-            for (auto &module: *_child_modules) {
-                if (module.name == next_module) {
-                    if (remaining_parts.size() == 1) {
-                        return &module;
-                    } else {
-                        //TEST TEST TEST
-                        auto    smaller_path_parts = std::vector<cstring>(remaining_parts.begin(), remaining_parts.end());
-                        cstring next_layer_path    = namespace_path::get_path_from_parts(smaller_path_parts);
-                        return find_namespace(next_layer_path);
-                    }
-                }
+            //we need to explore the remaining children
+            if (current_module->size() > 0) {
+                continue;
+            }
+
+            //uh-oh we ended up here. which means the path wasn't found
+            //because either we would have jumped in the next child
+            //or we've reached the end of the child modules without a
+            //full match on the path
+            return nullptr;
+        }
+
+        return nullptr;
+    }
+
+    module_definition * module_definition::find_namespace_by_relative_path(const cstring &relative_path) {
+        //first check if the module can be found straight down from here.
+        auto initial_module_result = find_namespace(relative_path);
+        if (initial_module_result != nullptr) return initial_module_result;
+
+        if (_parent_module == nullptr) {
+            return nullptr;
+        }
+
+        module_definition * current_module = _parent_module;
+
+        while (current_module != nullptr) {
+            auto found_module = current_module->find_namespace(relative_path);
+            if (found_module != nullptr) {
+                return found_module;
+            } else {
+                current_module = current_module->_parent_module;
+            }
+        }
+
+        return nullptr;
+    }
+
+    type_information * module_definition::find_type_by_absolute_path(const cstring &path) {
+        if (_parent_module != nullptr) return _parent_module->module_definition::find_type_by_absolute_path(path);
+
+        module_definition * found_module = this;
+
+        auto parent_namespace = namespace_path::get_parent(path);
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_absolute_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
+
+        for (auto &type : found_module->_child_types) {
+            if (type.full_path == path) {
+                return &type;
+            }
+        }
+
+        return nullptr;
+    }
+
+    type_information * module_definition::find_type_by_relative_path(const cstring &path) {
+        module_definition * found_module = this;
+
+        auto parent_namespace = namespace_path::get_parent(path);
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_relative_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
+
+        for (auto &type : found_module->_child_types) {
+            if (type.full_path == path) {
+                return &type;
             }
         }
 
@@ -53,9 +136,27 @@ namespace shade {
         };
 
         _child_modules->emplace_back(
-            child_name, fp
+            child_name, fp, this
         );
 
         return &_child_modules->back();
+    }
+
+    type_information * module_definition::add_child_type(const type_information &type) {
+        _child_types.emplace_back(type);
+        auto added_module = &_child_types.back();
+        added_module->related_module = this;
+        added_module->module_path = full_path;
+        added_module->full_path = full_path + spelling::modules::module_seperator + type.name;
+        return added_module;
+    }
+
+    function_definition * module_definition::add_child_function(const function_definition &func) {
+        _child_functions.emplace_back(func);
+        auto added_function = &_child_functions.back();
+        added_function->related_module = this;
+        added_function->module_path = full_path;
+        added_function->full_path = full_path + spelling::modules::module_seperator + func.name;
+        return added_function;
     }
 } // shade

@@ -18,7 +18,7 @@ namespace shade
 {
 
     struct type_information;
-    struct function;
+    struct function_definition;
 
     enum class ast_node_types {
         module_definition,
@@ -44,7 +44,7 @@ namespace shade
 
         ast_node * create_child(ast_node * parent);
         std::optional<type_information*> get_type_metadata(ast_node * parent);
-        std::optional<function*> get_function_metadata(ast_node * parent);
+        std::optional<function_definition*> get_function_metadata(ast_node * parent);
     };
 } // shade
 

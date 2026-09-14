@@ -79,8 +79,8 @@ SET( LIB_SHADE_SOURCES
        compiler/meta/type_index.cpp
        compiler/meta/type_index.h
        compiler/utils/exceptions.hpp
-       compiler/meta/function.cpp
-       compiler/meta/function.h
+       compiler/meta/function_definition.cpp
+       compiler/meta/function_definition.h
        compiler/meta/attribute.cpp
        compiler/meta/attribute.h
        compiler/ast/ast_node.cpp
