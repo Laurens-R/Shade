@@ -2,9 +2,9 @@
 // Created by laure on 11/09/2026.
 //
 
-#include "function_definition.h"
+#include "function_definition.hpp"
 
-#include "lang/namespace.hpp"
+#include "lang/path_utils.hpp"
 
 namespace shade
 {
@@ -17,8 +17,8 @@ namespace shade
         function_definition result;
 
         result.full_path = full_path;
-        result.name = namespace_path::get_type_from_path(full_path);
-        result.module_path = namespace_path::get_parent(full_path);
+        result.name = path_utils::get_object_from_path(full_path);
+        result.module_path = path_utils::get_namespace_from_path(full_path);
         result.is_method = is_method;
 
         return result;

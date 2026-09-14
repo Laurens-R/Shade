@@ -8,8 +8,8 @@
 #include <expected>
 #include <vector>
 
-#include "function_definition.h"
-#include "metadata.h"
+#include "function_definition.hpp"
+#include "metadata.hpp"
 
 #include "../utils/cstring.hpp"
 #include "../vendor/xxhash/xxhash.hpp"
@@ -36,11 +36,11 @@ namespace shade {
         reference, pointer, none
     };
 
-    struct type_information;
+    struct type_definition;
 
     struct type_field_definition {
         cstring name = cstring::empty();
-        type_information *related_type_information = {};
+        type_definition *related_type_information = {};
         size_t offset = 0;
     };
 
@@ -55,7 +55,7 @@ namespace shade {
     struct module_definition;
     struct capture_results;
 
-    struct type_information final : public metadata {
+    struct type_definition final : public metadata {
         std::vector<cstring> generics;
         std::vector<type_field_definition> fields;
         std::vector<function_definition> methods;
@@ -77,7 +77,7 @@ namespace shade {
         bool is_array = false;
         bool is_dynamic_array = false;
 
-        ~type_information() = default;
+        ~type_definition() = default;
 
         [[nodiscard]] size_t get_size() const;
 
@@ -87,15 +87,15 @@ namespace shade {
 
         [[nodiscard]] bool are_fields_valid() const;
 
-        void add_field(const cstring &field_name, type_information *type);
+        void add_field(const cstring &field_name, type_definition *type);
 
-        void add_method(const function_definition &func_def);
+        function_definition *add_method(const function_definition &func_def);
 
-        std::expected<type_information, generics_error> monomorphize(const std::vector<type_information *> types);
+        std::expected<type_definition, generics_error> monomorphize(const std::vector<type_definition *> types);
 
-        static type_information get_for_primitive_type(primitive_types primitive_type);
+        static type_definition get_for_primitive_type(primitive_types primitive_type);
 
-        static type_information create_struct(const cstring &full_path, ast_node *related_node, size_t alignment = sizeof(uintptr_t));
+        static type_definition create_struct(const cstring &full_path, ast_node *related_node, size_t alignment = sizeof(uintptr_t));
 
         metadata_type get_type() override;
     };

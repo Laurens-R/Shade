@@ -66,34 +66,35 @@ SET( LIB_SHADE_SOURCES
        compiler/parser/parser.cpp
        compiler/parser/parser.hpp
        compiler/parser/range_capture.cpp
-       compiler/parser/range_capture.h
+       compiler/parser/range_capture.hpp
        compiler/lexer/lexer.hpp
        compiler/lexer/lexer.cpp
        compiler/utils/flagutils.hpp
        compiler/pipeline/compilecontext.cpp
-       compiler/pipeline/compilecontext.h
+       compiler/pipeline/compilecontext.hpp
        compiler/pipeline/pipeline.cpp
-       compiler/pipeline/pipeline.h
-       compiler/meta/type_information.cpp
-       compiler/meta/type_information.h
-       compiler/meta/type_index.cpp
-       compiler/meta/type_index.h
+       compiler/pipeline/pipeline.hpp
+       compiler/meta/type_definition.cpp
+       compiler/meta/type_definition.hpp
+       compiler/meta/program_structure.cpp
+       compiler/meta/program_structure.hpp
        compiler/utils/exceptions.hpp
        compiler/meta/function_definition.cpp
-       compiler/meta/function_definition.h
+       compiler/meta/function_definition.hpp
        compiler/meta/attribute.cpp
-       compiler/meta/attribute.h
+       compiler/meta/attribute.hpp
        compiler/ast/ast_node.cpp
-       compiler/ast/ast_node.h
+       compiler/ast/ast_node.hpp
        compiler/meta/metadata.cpp
-       compiler/meta/metadata.h
+       compiler/meta/metadata.hpp
        compiler/lang/ops_and_actions.hpp
        compiler/utils/ctmap.hpp
        compiler/utils/exceptions.hpp
        compiler/meta/module_definition.cpp
        compiler/meta/module_definition.hpp
-       compiler/lang/namespace.hpp
-        compiler/parser/parser_range_keys.hpp)
+       compiler/lang/path_utils.hpp
+        compiler/parser/parser_range_keys.hpp
+        compiler/lang/path_utils.cpp)
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
 target_include_directories(lib_shade PUBLIC compiler)

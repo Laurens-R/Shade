@@ -4,7 +4,7 @@
 
 #include "module_definition.hpp"
 #include "../lang/spelling.hpp"
-#include "../lang/namespace.hpp"
+#include "../lang/path_utils.hpp"
 
 namespace shade {
     module_definition::module_definition()
@@ -38,7 +38,7 @@ namespace shade {
         if (path.is_empty()) return nullptr;
 
         module_definition *current_module = this;
-        auto path_parts = namespace_path::get_parts(path);
+        auto path_parts = path_utils::get_parts_from_path(path);
 
         for (size_t current_depth = 0; current_depth < path_parts.size(); ++current_depth) {
             for (auto & mod : *current_module) {
@@ -91,12 +91,12 @@ namespace shade {
         return nullptr;
     }
 
-    type_information * module_definition::find_type_by_absolute_path(const cstring &path) {
-        if (_parent_module != nullptr) return _parent_module->module_definition::find_type_by_absolute_path(path);
+    type_definition * module_definition::find_type_by_absolute_path(const cstring &path) {
+        if (_parent_module != nullptr) return _parent_module->find_type_by_absolute_path(path);
 
         module_definition * found_module = this;
 
-        auto parent_namespace = namespace_path::get_parent(path);
+        auto parent_namespace = path_utils::get_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_absolute_path(parent_namespace);
             if (found_module == nullptr) return nullptr;
@@ -111,10 +111,10 @@ namespace shade {
         return nullptr;
     }
 
-    type_information * module_definition::find_type_by_relative_path(const cstring &path) {
+    type_definition * module_definition::find_type_by_relative_path(const cstring &path) {
         module_definition * found_module = this;
 
-        auto parent_namespace = namespace_path::get_parent(path);
+        auto parent_namespace = path_utils::get_namespace_from_path(path);
         if (!parent_namespace.is_empty()) {
             found_module = find_namespace_by_relative_path(parent_namespace);
             if (found_module == nullptr) return nullptr;
@@ -129,23 +129,71 @@ namespace shade {
         return nullptr;
     }
 
-    module_definition *module_definition::add_child_module(const cstring &child_name) {
-        auto fp = cstring::empty();
+    function_definition * module_definition::find_function_by_absolute_path(const cstring &path) {
+        if (_parent_module != nullptr) return _parent_module->find_function_by_absolute_path(path);
 
-        if (!full_path.is_empty()) {
-            fp = full_path + spelling::modules::module_seperator + child_name;
-        } else {
-            fp = child_name;
-        };
+        module_definition * found_module = this;
 
-        _child_modules->emplace_back(
-            child_name, fp, this
-        );
+        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_absolute_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
 
-        return &_child_modules->back();
+        for (auto &child_function : found_module->_child_functions) {
+            if (child_function.full_path == path) {
+                return &child_function;
+            }
+        }
+
+        return nullptr;
     }
 
-    type_information * module_definition::add_child_type(const type_information &type) {
+    function_definition * module_definition::find_function_by_relative_path(const cstring &path) {
+        module_definition * found_module = this;
+
+        auto parent_namespace = path_utils::get_namespace_from_path(path);
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_relative_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
+
+        for (auto &child_function : found_module->_child_functions) {
+            if (child_function.full_path == path) {
+                return &child_function;
+            }
+        }
+
+        return nullptr;
+    }
+
+    module_definition *module_definition::add_child_module(const cstring &full_module_path) {
+
+        auto module_path = path_utils::get_namespace_from_path(full_module_path);
+
+        if (!module_path.is_empty()) {
+            auto found_parent_module = find_namespace_by_absolute_path(module_path);
+            if (found_parent_module == nullptr) return nullptr;
+
+            auto module_name = path_utils::get_object_from_path(full_module_path);
+
+            found_parent_module->_child_modules->emplace_back(
+                module_name, full_module_path, found_parent_module
+            );
+
+            return &found_parent_module->_child_modules->back();
+
+        } else {
+            //global scope module
+            _child_modules->emplace_back(
+                full_module_path, full_module_path, this
+            );
+
+            return &_child_modules->back();
+        };
+    }
+
+    type_definition * module_definition::add_child_type(const type_definition &type) {
         _child_types.emplace_back(type);
         auto added_module = &_child_types.back();
         added_module->related_module = this;

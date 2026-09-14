@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <lexer/lexer.hpp>
-#include <parser/range_capture.h>
+#include <parser/range_capture.hpp>
 #include <lang/spelling.hpp>
 
 TEST(range_capture, basic_match) {

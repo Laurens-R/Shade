@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#include "type_information.h"
+#include "type_definition.hpp"
 
 #include <unordered_map>
 
@@ -13,7 +13,7 @@
 #include "../lang/spelling.hpp"
 
 namespace shade {
-    size_t type_information::get_size() const {
+    size_t type_definition::get_size() const {
         if (is_primitive) {
             switch (primitive_type) {
                 case primitive_types::i8:
@@ -64,7 +64,7 @@ namespace shade {
         return 0;
     }
 
-    uint64_t type_information::get_hash() const {
+    uint64_t type_definition::get_hash() const {
         const cstring path = full_path;
 
         if (path.is_empty()) {
@@ -74,7 +74,7 @@ namespace shade {
         return xxh::xxhash<64>(path.to_c_string(), path.length());
     }
 
-    void type_information::calculate_offsets() {
+    void type_definition::calculate_offsets() {
         size_t current_offset = 0;
 
         for (auto& field : fields) {
@@ -97,7 +97,7 @@ namespace shade {
         }
     }
 
-    void type_information::add_field(const cstring& field_name, type_information* type) {
+    void type_definition::add_field(const cstring& field_name, type_definition* type) {
         if (type == nullptr) {
             throw compiler_exception("add_field: provided type was null.");
         }
@@ -115,16 +115,17 @@ namespace shade {
         });
     }
 
-    void type_information::add_method(const function_definition & func_def) {
+    function_definition *type_definition::add_method(const function_definition &func_def) {
         methods.push_back(func_def);
         auto added_method = &methods.back();
         added_method->related_type = this;
         added_method->full_path = full_path + spelling::modules::module_seperator + added_method->name;
         added_method->related_module = related_module;
         added_method->module_path = related_module->full_path;
+        return added_method;
     }
 
-    bool type_information::are_fields_valid() const {
+    bool type_definition::are_fields_valid() const {
         for (auto& field : fields) {
             if (field.related_type_information == nullptr) {
                 return false;
@@ -134,7 +135,7 @@ namespace shade {
         return true;
     }
 
-    std::expected<type_information, generics_error> type_information::monomorphize(const std::vector<type_information*> types) {
+    std::expected<type_definition, generics_error> type_definition::monomorphize(const std::vector<type_definition*> types) {
         if (generics.empty()) {
             return std::unexpected(generics_error::not_a_generic_type);
         }
@@ -150,7 +151,7 @@ namespace shade {
             return std::unexpected(generics_error::incomplete_type);
         }
 
-        type_information new_type = *this;
+        type_definition new_type = *this;
 
         auto check_for_known_generics = [&](const cstring& name) -> std::optional<size_t> {
             for (size_t i = 0; i < generics.size(); i++) {
@@ -180,7 +181,7 @@ namespace shade {
         return new_type;
     }
 
-    type_information type_information::get_for_primitive_type(primitive_types primitive_type) {
+    type_definition type_definition::get_for_primitive_type(primitive_types primitive_type) {
         if (primitive_type == primitive_types::nothing || primitive_type == primitive_types::unknown) {
             throw compiler_exception("Tried to get primitive type for nothing or unknown.");
         }
@@ -200,22 +201,22 @@ namespace shade {
             {primitive_types::boolean, spelling::types::boolean}
         });
 
-        type_information result = {};
+        type_definition result = {};
         result.is_primitive     = true;
         result.primitive_type   = primitive_type;
         result.name             = typemap.at(primitive_type);
-        result.module_path      = namespace_path::get_global_path() + cstring::empty();
+        result.module_path      = path_utils::get_global_path() + cstring::empty();
         result.full_path        = result.name;
 
         return result;
     }
 
-    type_information type_information::create_struct(const cstring& full_path, ast_node* related_node, size_t alignment) {
-        type_information result;
+    type_definition type_definition::create_struct(const cstring& full_path, ast_node* related_node, size_t alignment) {
+        type_definition result;
 
-        result.name         = namespace_path::get_type_from_path(full_path);
+        result.name         = path_utils::get_object_from_path(full_path);
         result.full_path    = full_path;
-        result.module_path  = namespace_path::get_parent(full_path);
+        result.module_path  = path_utils::get_namespace_from_path(full_path);
         result.is_struct    = true;
         result.alignment    = alignment;
         result.related_node = related_node;
@@ -223,7 +224,7 @@ namespace shade {
         return result;
     }
 
-    metadata_type type_information::get_type() {
+    metadata_type type_definition::get_type() {
         return metadata_type::type;
     }
 }

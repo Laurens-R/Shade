@@ -2,7 +2,7 @@
 // Created by laure on 11/09/2026.
 //
 
-#include "compilecontext.h"
+#include "compilecontext.hpp"
 
 namespace shade {
 
@@ -26,7 +26,7 @@ namespace shade {
         return _lookup_paths;
     }
 
-    type_index & compile_context::get_type_index()
+    program_structure & compile_context::get_type_index()
     {
         return _types;
     }

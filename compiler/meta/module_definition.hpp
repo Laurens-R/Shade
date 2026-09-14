@@ -9,8 +9,8 @@
 #include <span>
 
 #include "../utils/cstring.hpp"
-#include "type_information.h"
-#include "function_definition.h"
+#include "type_definition.hpp"
+#include "function_definition.hpp"
 
 namespace shade {
     struct capture_results;
@@ -19,7 +19,7 @@ namespace shade {
         protected:
             module_definition * _parent_module = nullptr;
             std::unique_ptr<std::deque<module_definition>> _child_modules;
-            std::deque<type_information> _child_types;
+            std::deque<type_definition> _child_types;
             std::deque<function_definition> _child_functions;
 
             module_definition *find_namespace(const cstring &path);
@@ -40,13 +40,17 @@ namespace shade {
 
             module_definition *find_namespace_by_relative_path(const cstring &relative_path);
 
-            type_information * find_type_by_absolute_path(const cstring & path);
+            type_definition * find_type_by_absolute_path(const cstring & path);
 
-            type_information * find_type_by_relative_path(const cstring & path);
+            type_definition * find_type_by_relative_path(const cstring & path);
 
-            module_definition *add_child_module(const cstring &child_name);
+            function_definition * find_function_by_absolute_path(const cstring & path);
 
-            type_information *add_child_type(const type_information &type);
+            function_definition * find_function_by_relative_path(const cstring & path);
+
+            module_definition *add_child_module(const cstring &full_module_path);
+
+            type_definition *add_child_type(const type_definition &type);
 
             function_definition *add_child_function(const function_definition &func);
     };

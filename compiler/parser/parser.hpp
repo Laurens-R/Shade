@@ -8,10 +8,10 @@
 #include <optional>
 #include <vector>
 
-#include "range_capture.h"
+#include "range_capture.hpp"
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
-#include "../pipeline/compilecontext.h"
+#include "../pipeline/compilecontext.hpp"
 
 namespace shade {
     class parser {

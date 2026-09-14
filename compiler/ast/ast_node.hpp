@@ -12,12 +12,12 @@
 
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
-#include "../meta/metadata.h"
+#include "../meta/metadata.hpp"
 
 namespace shade
 {
 
-    struct type_information;
+    struct type_definition;
     struct function_definition;
 
     enum class ast_node_types {
@@ -43,7 +43,7 @@ namespace shade
         language_token token;
 
         ast_node * create_child(ast_node * parent);
-        std::optional<type_information*> get_type_metadata(ast_node * parent);
+        std::optional<type_definition*> get_type_metadata(ast_node * parent);
         std::optional<function_definition*> get_function_metadata(ast_node * parent);
     };
 } // shade

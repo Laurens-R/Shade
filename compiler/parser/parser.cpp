@@ -4,11 +4,11 @@
 
 #include "parser.hpp"
 
-#include "range_capture.h"
+#include "range_capture.hpp"
 #include "../lang/spelling.hpp"
 #include "parser_range_keys.hpp"
 #include "../meta/module_definition.hpp"
-#include "../meta/function_definition.h"
+#include "../meta/function_definition.hpp"
 
 namespace shade {
     struct capture_methods {
@@ -325,7 +325,7 @@ namespace shade {
                         return;
                     }
 
-                    auto new_type = type_information::create_struct(name, nullptr);
+                    auto new_type = type_definition::create_struct(name, nullptr);
                     new_type.related_token_capture = &result;
                     type_index.add_typeinformation(new_type);
                 } else {
@@ -342,9 +342,10 @@ namespace shade {
                     module_definition *created_module = nullptr;
 
                     if (!parent_module) {
-                        created_module = type_index.global.add_child_module(module_name);
+                        created_module = type_index.add_module(module_name);
                     } else {
-                        created_module = parent_module->add_child_module(module_name);
+                        auto full_path = parent_module->full_path + spelling::modules::module_seperator + module_name;
+                        created_module = type_index.add_module(full_path);
                     }
 
                     created_module->related_token_capture = &result;
@@ -374,12 +375,12 @@ namespace shade {
                         if (struct_result) {
                             auto &struct_information = struct_result.value();
                             auto &original_struct_token = tokens[struct_information.from_token_index];
-                            auto struct_name = parent_module->full_path + spelling::modules::module_seperator + original_struct_token.text;
-                            auto full_function_name = struct_name + spelling::modules::module_seperator + function_name;
+                            auto struct_full_path = parent_module->full_path + spelling::modules::module_seperator + original_struct_token.text;
+                            auto full_function_name = struct_full_path + spelling::modules::module_seperator + function_name;
 
                             function_definition func_def = function_definition::create(full_function_name, true);
                             func_def.related_token_capture = &result;
-                            type_index.add_function_to_struct(struct_name, func_def);
+                            type_index.add_function_to_type(struct_full_path, func_def);
                         }
                     }
                 }

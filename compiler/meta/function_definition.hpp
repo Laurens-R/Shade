@@ -9,17 +9,17 @@
 
 #include "../utils/cstring.hpp"
 
-#include "attribute.h"
-#include "metadata.h"
+#include "attribute.hpp"
+#include "metadata.hpp"
 
 namespace shade
 {
-    struct type_information;
+    struct type_definition;
 
     struct function_argument
     {
         cstring name;
-        type_information* type;
+        type_definition* type;
     };
 
     class ast_node;
@@ -37,8 +37,8 @@ namespace shade
         ast_node* related_node = nullptr;
         module_definition* related_module = nullptr;
         capture_results * related_token_capture = nullptr;
-        type_information* related_type = nullptr;
-        type_information* return_type = nullptr;
+        type_definition* related_type = nullptr;
+        type_definition* return_type = nullptr;
 
         bool is_method = false;
 
