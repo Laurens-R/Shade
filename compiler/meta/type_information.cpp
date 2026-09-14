@@ -203,8 +203,9 @@ namespace shade {
         type_information result = {};
         result.is_primitive     = true;
         result.primitive_type   = primitive_type;
-        result.module_path      = namespace_path::get_global_path();
         result.name             = typemap.at(primitive_type);
+        result.module_path      = namespace_path::get_global_path() + cstring::empty();
+        result.full_path        = result.name;
 
         return result;
     }

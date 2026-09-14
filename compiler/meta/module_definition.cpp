@@ -27,7 +27,10 @@ namespace shade {
 
     module_definition *module_definition::find_namespace_by_absolute_path(const cstring & path) {
         //first ensure we perform this function at the root module
-        if (_parent_module != nullptr) return _parent_module->module_definition::find_namespace_by_absolute_path(path);
+        if (_parent_module != nullptr) {
+            return _parent_module->module_definition::find_namespace_by_absolute_path(path);
+        }
+
         return find_namespace(path);
     }
 

@@ -17,7 +17,7 @@ namespace shade {
 
     struct module_definition {
         protected:
-            module_definition * _parent_module;
+            module_definition * _parent_module = nullptr;
             std::unique_ptr<std::deque<module_definition>> _child_modules;
             std::deque<type_information> _child_types;
             std::deque<function_definition> _child_functions;

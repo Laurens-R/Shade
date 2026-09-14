@@ -111,3 +111,40 @@ TEST(parser_analysis, inside_of_module_mixed) {
     ASSERT_NE(b_type, nullptr);
     ASSERT_NE(c_type, nullptr);
 }
+
+TEST(parser_analysis, functions) {
+    shade::compile_context context;
+
+    constexpr const char * source = R"(
+        module m {
+
+            module n {
+                struct a {
+                }
+            }
+
+            struct b {
+            }
+
+            struct c {
+            }
+        }
+    )";
+
+    auto lex = shade::lexer(source, context);
+    const auto tokens = lex.tokenize();
+
+    auto parse = shade::parser(context, tokens);
+    auto parse_map = parse.first_pass();
+
+    parse.analyze_first_pass();
+
+    auto & types = context.get_type_index();
+    auto a_type = types.get_typeinformation("m::n::a");
+    auto b_type = types.get_typeinformation("m::b");
+    auto c_type = types.get_typeinformation("m::c");
+
+    ASSERT_NE(a_type, nullptr);
+    ASSERT_NE(b_type, nullptr);
+    ASSERT_NE(c_type, nullptr);
+}
