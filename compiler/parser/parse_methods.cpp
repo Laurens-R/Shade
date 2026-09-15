@@ -78,7 +78,9 @@ namespace shade {
                         .optional_match_and_capture_token(spelling::types::reference, range_keys::type_expression_reference)
                         .optional_match_and_capture_token(spelling::types::pointer, range_keys::type_expression_pointer)
                         .capture_tokens_by_count(1, range_keys::type_expression_typename)
-                        .optional_capture_range(spelling::types::array_index_begin, spelling::types::array_index_end, range_keys::type_expression_array_range);
+                        .optional_match_and_capture_token(spelling::types::dynamic_array, range_keys::type_expression_dynamic_array_range)
+                        .optional_capture_range(spelling::types::array_index_begin, spelling::types::array_index_end, range_keys::type_expression_fixed_array_range);
+
 
         are_parsers_initialized = true;
     }

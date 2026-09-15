@@ -152,6 +152,7 @@ namespace shade {
             inline constexpr const char* float_64          = "f64";
             inline constexpr const char* array_index_begin = "[";
             inline constexpr const char* array_index_end   = "]";
+            inline constexpr const char* dynamic_array     = "[]";
         }
     }
 }

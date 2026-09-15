@@ -227,7 +227,7 @@ namespace shade {
     struct type_expression {
         type_definition *type = nullptr;
         uint64_t fixed_array_size = 0;
-        bool is_owning = false;
+        bool is_owned = false;
         bool is_const = false;
         bool is_array = false;
         bool is_ptr = false;
