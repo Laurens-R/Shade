@@ -101,6 +101,9 @@ SET( LIB_SHADE_SOURCES
         compiler/parser/typeexpressionparser.hpp
         compiler/parser/parse_methods.cpp
         compiler/parser/parse_methods.hpp
+        shared/value.hpp
+        runtime/vm/vmstate.hpp
+        shared/instruction.hpp
 )
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})

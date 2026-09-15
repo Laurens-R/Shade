@@ -77,7 +77,8 @@ namespace shade {
                         .optional_match_and_capture_token(spelling::types::constant, range_keys::type_expression_constant)
                         .optional_match_and_capture_token(spelling::types::reference, range_keys::type_expression_reference)
                         .optional_match_and_capture_token(spelling::types::pointer, range_keys::type_expression_pointer)
-                        .capture_tokens_by_count(1, range_keys::type_expression_typename)
+                        .capture_tokens_by_count(1, range_keys::type_expression_typename) // TODO: This is not going to work for type names with a path
+                        .optional_capture_range(spelling::generics::generic_begin, spelling::generics::generic_end, range_keys::type_expression_generic_range )
                         .optional_match_and_capture_token(spelling::types::dynamic_array, range_keys::type_expression_dynamic_array_range)
                         .optional_capture_range(spelling::types::array_index_begin, spelling::types::array_index_end, range_keys::type_expression_fixed_array_range);
 

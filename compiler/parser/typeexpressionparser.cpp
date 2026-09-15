@@ -39,7 +39,8 @@ namespace shade {
             }
 
             auto & ps = context.get_program_structure();
-            //todo: parse and store type information.
+
+            // parse_result.contains_key(range_keys::type_expression_typename)
         }
 
         return result;

@@ -98,12 +98,20 @@ namespace shade {
             bool contains_module_definition(const cstring &module_path);
 
             /**
+             * Tries to find a function definition at the specified path relative to the specified module path.
+             * @param relative_path The path to the function as stated in the code (eg: "console::read")
+             * @param module_start_path The path of the module where the function is being requested (eg: "std::io")
+             * @return The function definition if it exists, nullptr otherwise.
+             */
+            function_definition * find_function_definition(const cstring & relative_path, const cstring & module_start_path);
+
+            /**
              * Tries to find a type definition at the specified path relative to the specified module path.
-             * @param type_path The path to the type as stated in the code (eg: "string_builder")
-             * @param module_path The path of the module where the type is being requested (eg: "std::io")
+             * @param relative_path The path to the type as stated in the code (eg: "string_builder")
+             * @param module_start_path The path of the module where the type is being requested (eg: "std::io")
              * @return The type definition if it exists, nullptr otherwise.
              */
-            type_definition * find_type_definition(const cstring &type_path, const cstring & module_path);
+            type_definition * find_type_definition(const cstring &relative_path, const cstring & module_start_path);
 
             /**
              * Tries to get a type definition at the specified path.

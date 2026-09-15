@@ -74,6 +74,7 @@ namespace shade {
         static inline const char * type_expression_typename = "type_exp_typename";
         static inline const char * type_expression_fixed_array_range = "type_exp_fixed_array_range";
         static inline const char * type_expression_dynamic_array_range = "type_exp_dynamic_array_range";
+        static inline const char * type_expression_generic_range = "type_exp_generic_range";
 
     };
 }

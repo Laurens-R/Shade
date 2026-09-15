@@ -119,8 +119,20 @@ namespace shade {
         return _registered_module_mapping.contains(module_path.to_c_string());
     }
 
-    type_definition * program_structure::find_type_definition(const cstring &type_path, const cstring &module_path) {
+    function_definition * program_structure::find_function_definition(const cstring &relative_path, const cstring &module_start_path) {
+        module_definition * mod_def = get_module_definition(module_start_path);
 
+        if (mod_def == nullptr) return nullptr;
+
+        return mod_def->find_function_by_relative_path(relative_path);
+    }
+
+    type_definition * program_structure::find_type_definition(const cstring &relative_path, const cstring &module_start_path) {
+        module_definition * mod_def = get_module_definition(module_start_path);
+
+        if (mod_def == nullptr) return nullptr;
+
+        return mod_def->find_type_by_relative_path(relative_path);
     }
 
     type_definition * program_structure::get_type_definition(const cstring &type_path) {
