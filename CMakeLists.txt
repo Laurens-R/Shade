@@ -70,10 +70,10 @@ SET( LIB_SHADE_SOURCES
        compiler/lexer/lexer.hpp
        compiler/lexer/lexer.cpp
        compiler/utils/flagutils.hpp
-       compiler/pipeline/compilecontext.cpp
-       compiler/pipeline/compilecontext.hpp
-       compiler/pipeline/pipeline.cpp
-       compiler/pipeline/pipeline.hpp
+       compiler/compilecontext.cpp
+       compiler/compilecontext.hpp
+       compiler/compiler.cpp
+       compiler/compiler.hpp
        compiler/meta/type_definition.cpp
        compiler/meta/type_definition.hpp
        compiler/meta/program_structure.cpp
@@ -100,6 +100,8 @@ SET( LIB_SHADE_SOURCES
         compiler/parser/typeexpressionparser.cpp
         compiler/parser/typeexpressionparser.hpp
         compiler/parser/parser_type_expression_keys.hpp
+        compiler/parser/capturemethods.cpp
+        compiler/parser/capturemethods.hpp
 )
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
@@ -111,14 +113,14 @@ target_link_libraries(shade PRIVATE lib_shade)
 
 add_subdirectory(vendor/googletest)
 enable_testing()
-add_executable(tests tests/namespace_tests.cpp
-        tests/cstring_tests.cpp
-        tests/lexer_tests.cpp
-        tests/tests_common.hpp
-        tests/parser_tests.cpp
-        tests/range_capture_test.cpp
-        tests/parser_scan_tests.cpp
-        tests/module_definition_tests.cpp)
+add_executable(tests tests/parser/namespace_tests.cpp
+        tests/parser/cstring_tests.cpp
+        tests/parser/lexer_tests.cpp
+        tests/parser/tests_common.hpp
+        tests/parser/parser_tests.cpp
+        tests/parser/range_capture_test.cpp
+        tests/parser/parser_scan_tests.cpp
+        tests/parser/module_definition_tests.cpp)
 target_include_directories(tests PUBLIC compiler)
 target_link_libraries(tests PRIVATE lib_shade)
 target_link_libraries(tests PRIVATE GTest::gtest_main )

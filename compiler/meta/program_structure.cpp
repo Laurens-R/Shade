@@ -119,6 +119,10 @@ namespace shade {
         return _registered_module_mapping.contains(module_path.to_c_string());
     }
 
+    type_definition * program_structure::find_type_definition(const cstring &type_path, const cstring &module_path) {
+
+    }
+
     type_definition * program_structure::get_type_definition(const cstring &type_path) {
         if (!contains_type_definition(type_path)) return nullptr;
         return _registered_types[_registered_type_mapping.at(type_path.to_c_string())];

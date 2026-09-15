@@ -34,7 +34,7 @@ TEST(module_definition, global_function) {
 
 TEST(module_definition, global_struct) {
     shade::module_definition global_module("a", "a");
-    shade::type_definition s1 = shade::type_definition::create_struct("a::s1");
+    shade::type_definition s1 = shade::type_definition::create("a::s1");
     global_module.add_child_type(s1);
 
     auto found_struct = global_module.find_type_by_absolute_path("a::s1");
@@ -53,7 +53,7 @@ TEST(module_definition, combined) {
     shade::function_definition f1 = shade::function_definition::create("a::b::f1", false);
     global_module.add_child_function(f1);
 
-    shade::type_definition s1 = shade::type_definition::create_struct("a::c::s1");
+    shade::type_definition s1 = shade::type_definition::create("a::c::s1");
     global_module.add_child_type(s1);
 
     shade::function_definition f2 = shade::function_definition::create("a::c::s1::f2", true);

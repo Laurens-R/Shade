@@ -2,21 +2,16 @@
 // Created by laure on 11/09/2026.
 //
 
-#include "pipeline.hpp"
+#include "compiler.hpp"
 #include "compilecontext.hpp"
 
-#include "../lexer/lexer.hpp"
-#include "../parser/parser.hpp"
+#include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
 
 
 namespace shade {
-
-    void pipeline::compile(const cstring& source_path) {
-
+    void compiler::compile_from_source(cstring source) {
         compile_context context;
-
-        cstring source = cstring::empty(); //todo load claw source
-
         //phase 1: pre-process
 
         //phase 2: lex into tokens
@@ -40,5 +35,11 @@ namespace shade {
         //phase 6: bytecode optimizer
 
         //phase 7: AOT compile into executable image
+    }
+
+    void compiler::compile_from_path(const cstring& source_path) {
+
+        cstring source = cstring::empty(); //todo load claw source
+        compile_from_source(source);
     }
 }

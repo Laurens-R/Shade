@@ -11,7 +11,7 @@
 #include "range_capture.hpp"
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
-#include "../pipeline/compilecontext.hpp"
+#include "../compilecontext.hpp"
 
 namespace shade {
     class parser {

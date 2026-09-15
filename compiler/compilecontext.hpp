@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "../utils/cstring.hpp"
-#include "../meta/program_structure.hpp"
+#include "utils/cstring.hpp"
+#include "meta/program_structure.hpp"
 
 namespace shade {
     struct diagnostic {

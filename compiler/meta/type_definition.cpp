@@ -211,7 +211,7 @@ namespace shade {
         return result;
     }
 
-    type_definition type_definition::create_struct(const cstring& full_path, ast_node* related_node, size_t alignment) {
+    type_definition type_definition::create(const cstring& full_path, ast_node* related_node, size_t alignment) {
         type_definition result;
 
         result.name         = path_utils::get_object_from_path(full_path);

@@ -63,6 +63,14 @@ namespace shade {
 
         static inline const char * statement_type_key = "statement";
         static inline const char * statement_expression = "statement_expression";
+
+        static inline const char * type_expression_owning = "type_exp_owned";
+        static inline const char * type_expression_constant = "type_exp_constant";
+        static inline const char * type_expression_reference = "type_exp_reference";
+        static inline const char * type_expression_pointer = "type_exp_pointer";
+        static inline const char * type_expression_typename = "type_exp_typename";
+        static inline const char * type_expression_array_range = "type_exp_array_range";
+
     };
 }
 

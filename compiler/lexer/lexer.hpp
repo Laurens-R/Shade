@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "../utils/cstring.hpp"
-#include "../pipeline/compilecontext.hpp"
+#include "../compilecontext.hpp"
 
 namespace shade {
     constexpr std::uint32_t TOKENIZERSTATE_NONE           = 0b00000;

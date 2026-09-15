@@ -25,6 +25,10 @@ namespace shade {
         return _captured_ranges[_captured_ranges_by_key.at(key.to_c_string())];
     }
 
+    bool capture_results::contains_key(const cstring &key) {
+        return _captured_ranges_by_key.contains(key.to_c_string());
+    }
+
     size_t capture_results::get_size() {
         return _captured_ranges.size();
     }
