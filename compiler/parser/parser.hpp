@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 
-#include "range_capture.hpp"
+#include "range_parser.hpp"
 #include "../utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 #include "../compilecontext.hpp"
@@ -17,13 +17,13 @@ namespace shade {
     class parser {
         private:
             compile_context &_context;
-            std::vector<capture_results> _code_map;
+            std::vector<parsed_ranges> _code_map;
             const std::vector<language_token> &_tokens;
 
         public:
             parser(compile_context &context, const std::vector<language_token> &tokens);
 
-            std::vector<capture_results> &capture_main_areas();
+            std::vector<parsed_ranges> &capture_main_areas();
             void analyze_main_areas();
 
 

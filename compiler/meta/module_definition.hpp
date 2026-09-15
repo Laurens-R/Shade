@@ -13,7 +13,7 @@
 #include "function_definition.hpp"
 
 namespace shade {
-    struct capture_results;
+    struct parsed_ranges;
 
     struct module_definition {
         protected:
@@ -27,7 +27,7 @@ namespace shade {
 
             cstring name;
             cstring full_path;
-            capture_results * related_token_capture = nullptr;
+            parsed_ranges * related_token_capture = nullptr;
 
             module_definition();
             module_definition(const cstring &module_name, const cstring &module_path, module_definition * parent = nullptr);

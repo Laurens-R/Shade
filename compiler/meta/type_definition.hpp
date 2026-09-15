@@ -58,7 +58,7 @@ namespace shade {
 
     class ast_node;
     struct module_definition;
-    struct capture_results;
+    struct parsed_ranges;
 
     /**
      * A type_definition represents any type in the language. Even primitive types.
@@ -121,9 +121,9 @@ namespace shade {
         module_definition *related_module = nullptr;
 
         /**
-         * The capture_results instance that represents the parsed tokens for this type.
+         * The parsed_ranges instance that represents the parsed tokens for this type.
          */
-        capture_results * related_token_capture = nullptr;
+        parsed_ranges * related_token_capture = nullptr;
 
         /**
          * The alignment of the type.

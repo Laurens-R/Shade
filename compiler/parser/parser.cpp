@@ -4,28 +4,22 @@
 
 #include "parser.hpp"
 
-#include "range_capture.hpp"
+#include "range_parser.hpp"
 #include "../lang/spelling.hpp"
 #include "parser_range_keys.hpp"
 #include "../meta/module_definition.hpp"
 #include "../meta/function_definition.hpp"
-#include "capturemethods.hpp"
+#include "parse_methods.hpp"
 
 //todo: refactor file
 
 namespace shade {
 
-
-    static const capture_methods &get_capture_methods() {
-        static capture_methods methods;
-        return methods;
-    }
-
     parser::parser(compile_context &context, const std::vector<language_token> &tokens)
         : _context(context), _tokens(tokens) {}
 
-    static size_t process_statements(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
-        auto &capture_methods = get_capture_methods();
+    static size_t process_statements(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<parsed_ranges> &results) {
+        auto &parsers = parse_methods::get_instance();
 
         auto current_token_index = from_token_index;
 
@@ -33,7 +27,7 @@ namespace shade {
             /*
              * If-then-else statements
              */
-            auto if_result = capture_methods.if_range.try_capture(tokens, current_token_index, to_token_index);
+            auto if_result = parsers.if_conditional.try_capture(tokens, current_token_index, to_token_index);
             if (if_result.matched) {
                 auto if_body_result = if_result.get_captured_range(range_keys::if_body);
                 if (if_body_result) {
@@ -47,7 +41,7 @@ namespace shade {
                  * else-if and else are nested into if because they can only be used after an if.
                  */
 
-                auto if_else_result = capture_methods.if_else_range.try_capture(tokens, current_token_index, to_token_index);
+                auto if_else_result = parsers.if_else_conditional.try_capture(tokens, current_token_index, to_token_index);
                 if (if_else_result.matched) {
                     auto if_else_body_result = if_else_result.get_captured_range(range_keys::if_else_body);
                     if (if_else_body_result) {
@@ -59,7 +53,7 @@ namespace shade {
                     current_token_index = if_else_result.range_to_index;
                 }
 
-                auto else_result = capture_methods.else_range.try_capture(tokens, current_token_index, to_token_index);
+                auto else_result = parsers.else_conditional.try_capture(tokens, current_token_index, to_token_index);
                 if (else_result.matched) {
                     auto else_body_result = else_result.get_captured_range(range_keys::else_body);
                     if (else_body_result) {
@@ -77,7 +71,7 @@ namespace shade {
             /*
              * For loops
              */
-            auto for_result = capture_methods.for_loop_range.try_capture(tokens, current_token_index, to_token_index);
+            auto for_result = parsers.for_loop.try_capture(tokens, current_token_index, to_token_index);
             if (for_result.matched) {
                 auto for_body_result = for_result.get_captured_range(range_keys::for_loop_body);
                 if (for_body_result) {
@@ -94,7 +88,7 @@ namespace shade {
             /*
              * While loops
              */
-            auto while_result = capture_methods.while_loop_range.try_capture(tokens, current_token_index, to_token_index);
+            auto while_result = parsers.while_loop.try_capture(tokens, current_token_index, to_token_index);
             if (while_result.matched) {
                 auto while_body_result = while_result.get_captured_range(range_keys::while_loop_body);
                 if (while_body_result) {
@@ -110,7 +104,7 @@ namespace shade {
             /*
              * Regular statements
              */
-            auto statement_result = capture_methods.statement_range.try_capture(tokens, current_token_index, to_token_index);
+            auto statement_result = parsers.statements.try_capture(tokens, current_token_index, to_token_index);
             if (statement_result.matched) {
                 results.push_back(statement_result);
                 current_token_index = statement_result.range_to_index + 1;
@@ -121,8 +115,8 @@ namespace shade {
         return current_token_index;
     }
 
-    static size_t process_struct_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
-        auto &capture_methods = get_capture_methods();
+    static size_t process_struct_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<parsed_ranges> &results) {
+        auto &parsers = parse_methods::get_instance();
 
         auto current_token_index = from_token_index;
 
@@ -130,7 +124,7 @@ namespace shade {
             /*
              * Functions
              */
-            auto function_result = capture_methods.function_range.try_capture(tokens, current_token_index, to_token_index);
+            auto function_result = parsers.functions.try_capture(tokens, current_token_index, to_token_index);
             if (function_result.matched) {
                 auto function_body_result = function_result.get_captured_range(range_keys::function_body);
                 if (function_body_result) {
@@ -150,7 +144,7 @@ namespace shade {
         return current_token_index;
     }
 
-    static void generate_parse_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<capture_results> &results) {
+    static void generate_parse_map(const std::vector<language_token> &tokens, const size_t from_token_index, const size_t to_token_index, std::vector<parsed_ranges> &results) {
         //this can happen in case a passed down subscope is empty (e.g. a function with no body)
         //you want to call generate_parse_map with +1 from_token_index and -1 to_token_index to
         //ensure that you don't include the begin and end tokens of the subscope. However
@@ -159,14 +153,14 @@ namespace shade {
             return;
         }
 
-        auto &capture_methods = get_capture_methods();
+        auto &parsers = parse_methods::get_instance();
         auto current_token_index = from_token_index;
 
         while (current_token_index <= to_token_index) {
             /*
              * Modules
              */
-            auto module_result = capture_methods.module_range.try_capture(tokens, current_token_index, to_token_index);
+            auto module_result = parsers.modules.try_capture(tokens, current_token_index, to_token_index);
             if (module_result.matched) {
                 auto module_body_result = module_result.get_captured_range(range_keys::module_body);
                 if (module_body_result) {
@@ -185,7 +179,7 @@ namespace shade {
             /*
              * Structs
              */
-            auto struct_result = capture_methods.struct_range.try_capture(tokens, current_token_index, to_token_index);
+            auto struct_result = parsers.structs.try_capture(tokens, current_token_index, to_token_index);
             if (struct_result.matched) {
                 auto struct_body_result = struct_result.get_captured_range(range_keys::struct_body);
                 if (struct_body_result) {
@@ -200,7 +194,7 @@ namespace shade {
             /*
              * Functions
              */
-            auto function_result = capture_methods.function_range.try_capture(tokens, current_token_index, to_token_index);
+            auto function_result = parsers.functions.try_capture(tokens, current_token_index, to_token_index);
             if (function_result.matched) {
                 auto function_body_result = function_result.get_captured_range(range_keys::function_body);
                 if (function_body_result) {
@@ -218,13 +212,13 @@ namespace shade {
         }
     }
 
-    std::vector<capture_results> &parser::capture_main_areas() {
+    std::vector<parsed_ranges> &parser::capture_main_areas() {
         _code_map.clear();
         generate_parse_map(_tokens, 0, _tokens.size() - 1, _code_map);
         return _code_map;
     }
 
-    static void analyze_map(std::vector<capture_results> &captured_information, const std::vector<language_token> &tokens, compile_context &context, capture_results *parent = nullptr, module_definition *parent_module = nullptr, type_definition * parent_type = nullptr) {
+    static void analyze_map(std::vector<parsed_ranges> &captured_information, const std::vector<language_token> &tokens, compile_context &context, parsed_ranges *parent = nullptr, module_definition *parent_module = nullptr, type_definition * parent_type = nullptr) {
         auto &program_structure = context.get_program_structure();
 
         for (auto &result: captured_information) {

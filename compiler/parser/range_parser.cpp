@@ -2,45 +2,45 @@
 // Created by laure on 10/09/2026.
 //
 
-#include "range_capture.hpp"
+#include "range_parser.hpp"
 
 #include <ranges>
 
 namespace shade {
 
-    void capture_results::reset() {
+    void parsed_ranges::reset() {
         _captured_ranges.clear();
         _captured_ranges_by_key.clear();
     }
 
-    void capture_results::add_captured_range(size_t from, size_t to, const cstring &key) {
+    void parsed_ranges::add_captured_range(size_t from, size_t to, const cstring &key) {
         _captured_ranges.emplace_back(key, from, to);
         _captured_ranges_by_key.insert_or_assign(key.to_c_string(), _captured_ranges.size() - 1);
     }
 
-    std::optional<captured_range> capture_results::get_captured_range(const cstring &key) {
+    std::optional<parsed_range> parsed_ranges::get_captured_range(const cstring &key) {
         if (!_captured_ranges_by_key.contains(key.to_c_string())) {
             return std::nullopt;
         }
         return _captured_ranges[_captured_ranges_by_key.at(key.to_c_string())];
     }
 
-    bool capture_results::contains_key(const cstring &key) {
+    bool parsed_ranges::contains_key(const cstring &key) {
         return _captured_ranges_by_key.contains(key.to_c_string());
     }
 
-    size_t capture_results::get_size() {
+    size_t parsed_ranges::get_size() {
         return _captured_ranges.size();
     }
 
-    std::optional<captured_range> capture_results::get_captured_range_at(const size_t index) {
+    std::optional<parsed_range> parsed_ranges::get_captured_range_at(const size_t index) {
         if (index >= _captured_ranges.size()) {
             return std::nullopt;
         }
         return _captured_ranges[index];
     }
 
-    range_capture &range_capture::optional_match_and_capture_token(const cstring &token, const cstring &key) {
+    range_parser &range_parser::optional_match_and_capture_token(const cstring &token, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::optional_match_single,
             .match_tokens = {token},
@@ -51,7 +51,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::match_and_capture_token(const cstring &token, const cstring &key) {
+    range_parser &range_parser::match_and_capture_token(const cstring &token, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::match_single,
             .match_tokens = {token},
@@ -62,7 +62,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::match_and_capture_any_token(const std::vector<cstring> &tokens, const cstring &key) {
+    range_parser &range_parser::match_and_capture_any_token(const std::vector<cstring> &tokens, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::match_any,
             .match_tokens = tokens,
@@ -73,7 +73,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::capture_tokens_by_count(size_t count, const cstring &key) {
+    range_parser &range_parser::capture_tokens_by_count(size_t count, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::take_n,
             .match_tokens = {},
@@ -84,7 +84,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::if_next_token_present(const cstring &token) {
+    range_parser &range_parser::if_next_token_present(const cstring &token) {
         _parse_instructions.push_back({
             .type = instruction_type::if_next_token_present,
             .match_tokens = {token},
@@ -95,7 +95,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::skip_tokens_by(size_t count) {
+    range_parser &range_parser::skip_tokens_by(size_t count) {
         _parse_instructions.push_back({
             .type = instruction_type::skip_count,
             .match_tokens = {},
@@ -106,7 +106,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::skip_token_until(const cstring &token) {
+    range_parser &range_parser::skip_token_until(const cstring &token) {
         _parse_instructions.push_back({
             .type = instruction_type::skip_until,
             .match_tokens = {token},
@@ -117,7 +117,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::take_token_until(const cstring &token, const cstring &key) {
+    range_parser &range_parser::take_token_until(const cstring &token, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::take_until,
             .match_tokens = {token},
@@ -128,7 +128,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::optional_capture_range(const cstring &from, const cstring &to, const cstring &key) {
+    range_parser &range_parser::optional_capture_range(const cstring &from, const cstring &to, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::optional_match_range,
             .match_tokens = {from, to},
@@ -139,7 +139,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::capture_range(const cstring &from, const cstring &to, const cstring &key) {
+    range_parser &range_parser::capture_range(const cstring &from, const cstring &to, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::match_range,
             .match_tokens = {from, to},
@@ -150,7 +150,7 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::optional_take_until_if_previous_key(const cstring &previous_key, const cstring &until_token, const cstring &key) {
+    range_parser &range_parser::optional_take_until_if_previous_key(const cstring &previous_key, const cstring &until_token, const cstring &key) {
         _parse_instructions.push_back({
             .type = instruction_type::optional_take_until_if_previous_key,
             .match_tokens = {until_token},
@@ -162,13 +162,13 @@ namespace shade {
         return *this;
     }
 
-    range_capture &range_capture::set_type(const cstring &type_key) {
+    range_parser &range_parser::set_type(const cstring &type_key) {
         capture_type_key = type_key;
         return *this;
     }
 
-    capture_results range_capture::try_capture(const std::vector<language_token> &tokens, size_t from_index, size_t to_index) const {
-        capture_results results;
+    parsed_ranges range_parser::try_capture(const std::vector<language_token> &tokens, size_t from_index, size_t to_index) const {
+        parsed_ranges results;
         results.type_key = capture_type_key;
 
         if (from_index > to_index) {

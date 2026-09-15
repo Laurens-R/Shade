@@ -25,7 +25,7 @@ namespace shade
 
     class ast_node;
     struct module_definition;
-    struct capture_results;
+    struct parsed_ranges;
 
     struct function_definition final : public metadata
     {
@@ -37,7 +37,7 @@ namespace shade
 
         ast_node* related_node = nullptr;
         module_definition* related_module = nullptr;
-        capture_results * related_token_capture = nullptr;
+        parsed_ranges * related_token_capture = nullptr;
         type_definition* related_type = nullptr;
         type_definition* return_type = nullptr;
 

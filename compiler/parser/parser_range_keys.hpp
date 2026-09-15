@@ -6,6 +6,9 @@
 #define SHADE_PARSER_RANGE_KEYS_HPP
 
 namespace shade {
+    /**
+     * A centralized definition of keys used to identify parsed ranges.
+     */
     struct range_keys {
         static inline const char * attribute_type_key = "attribute";
         static inline const char * attribute_indicator = "attribute_token";

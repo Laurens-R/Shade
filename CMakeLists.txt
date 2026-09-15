@@ -65,8 +65,8 @@ SET( LIB_SHADE_SOURCES
        compiler/lang/spelling.hpp
        compiler/parser/parser.cpp
        compiler/parser/parser.hpp
-       compiler/parser/range_capture.cpp
-       compiler/parser/range_capture.hpp
+       compiler/parser/range_parser.cpp
+       compiler/parser/range_parser.hpp
        compiler/lexer/lexer.hpp
        compiler/lexer/lexer.cpp
        compiler/utils/flagutils.hpp
@@ -99,9 +99,8 @@ SET( LIB_SHADE_SOURCES
         compiler/parser/structparser.hpp
         compiler/parser/typeexpressionparser.cpp
         compiler/parser/typeexpressionparser.hpp
-        compiler/parser/parser_type_expression_keys.hpp
-        compiler/parser/capturemethods.cpp
-        compiler/parser/capturemethods.hpp
+        compiler/parser/parse_methods.cpp
+        compiler/parser/parse_methods.hpp
 )
 
 add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
