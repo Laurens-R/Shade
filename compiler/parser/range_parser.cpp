@@ -355,6 +355,7 @@ namespace shade {
                     }
                 }
                 //we purposefully fall through here to leverage the existing skip unit logic
+                case instruction_type::take_until:
                 case instruction_type::skip_until: {
                     if (instruction.match_tokens.empty()) {
                         results.failure_message = "No tokens to skip until.";
@@ -384,7 +385,8 @@ namespace shade {
                     } else {
                         matched = true;
 
-                        if (instruction.type == instruction_type::optional_take_until_if_previous_key) {
+                        if (instruction.type == instruction_type::optional_take_until_if_previous_key
+                            || instruction.type == instruction_type::take_until) {
                             results.add_captured_range(start_token_index, current_token_index, instruction.key);
                         }
                     }

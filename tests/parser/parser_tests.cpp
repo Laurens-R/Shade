@@ -23,7 +23,7 @@ TEST(parser, basic_variable) {
     ASSERT_TRUE(parse_map.size() == 1);
 
     auto & var_result = parse_map.at(0);
-    ASSERT_EQ(var_result.type_key, shade::range_keys::generic_type_key);
+    ASSERT_EQ(var_result.type_key, shade::range_keys::statement_type_key);
 
     ASSERT_EQ(var_result.range_from_index, 0);
     ASSERT_EQ(var_result.range_to_index, 2);

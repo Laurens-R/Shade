@@ -119,7 +119,8 @@ add_executable(tests tests/parser/namespace_tests.cpp
         tests/parser/parser_tests.cpp
         tests/parser/range_capture_test.cpp
         tests/parser/parser_scan_tests.cpp
-        tests/parser/module_definition_tests.cpp)
+        tests/parser/module_definition_tests.cpp
+        tests/parser/type_expression_parser_tests.cpp)
 target_include_directories(tests PUBLIC compiler)
 target_link_libraries(tests PRIVATE lib_shade)
 target_link_libraries(tests PRIVATE GTest::gtest_main )
