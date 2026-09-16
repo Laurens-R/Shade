@@ -9,7 +9,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 
 namespace shade {

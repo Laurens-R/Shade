@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "spelling.hpp"
 
 namespace shade {

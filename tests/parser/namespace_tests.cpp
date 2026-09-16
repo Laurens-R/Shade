@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include <lang/path_utils.hpp>
+#include <compiler/lang/path_utils.hpp>
 
 TEST(namespaces, global_path) {
     auto global_path = shade::path_utils::get_global_path();

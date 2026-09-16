@@ -4,7 +4,7 @@
 
 #include "function_definition.hpp"
 
-#include "lang/path_utils.hpp"
+#include <compiler/lang/path_utils.hpp>
 
 namespace shade
 {

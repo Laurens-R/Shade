@@ -43,7 +43,7 @@ You can contact the author at :
 * Sadly has to be included in the global namespace or literally everything breaks
 */
 #if (defined(__ARM_NEON) && defined(__APPLE__))
-#include "sse2neon.h"
+#include "../sse2neon/sse2neon.h"
 #else
 #include <immintrin.h>
 #endif
@@ -196,7 +196,7 @@ namespace xxh
 #	define XXH_FORCE_INLINE static inline __attribute__((always_inline))
 #	define XXH_NO_INLINE static __attribute__((noinline))
 #if (defined(__ARM_NEON) && defined(__APPLE__))
-#  include "sse2neon.h"
+#  include "../sse2neon/sse2neon.h"
 # else
 #  include <immintrin.h>
 # endif

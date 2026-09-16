@@ -8,7 +8,7 @@
 #include <deque>
 #include <span>
 
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "type_definition.hpp"
 #include "function_definition.hpp"
 

@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include <utils/cstring.hpp>
+#include <shared/utils/cstring.hpp>
 
 TEST(cstring, length) {
     shade::cstring str = "Hello, World!";

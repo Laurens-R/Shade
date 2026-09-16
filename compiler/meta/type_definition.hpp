@@ -11,8 +11,8 @@
 #include "function_definition.hpp"
 #include "metadata.hpp"
 
-#include "../utils/cstring.hpp"
-#include "../vendor/xxhash/xxhash.hpp"
+#include <shared/utils/cstring.hpp>
+#include <vendor/xxhash/xxhash.hpp>
 
 namespace shade {
     enum class primitive_types {

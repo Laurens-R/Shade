@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "range_parser.hpp"
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 #include "../compilecontext.hpp"
 

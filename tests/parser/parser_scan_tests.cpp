@@ -4,10 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include <lexer/lexer.hpp>
-#include <parser/parser.hpp>
-
-#include "parser/parser_range_keys.hpp"
+#include <compiler/lexer/lexer.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/parser/parser_range_keys.hpp>
 
 TEST(parser_analysis, top_level_first_pass) {
     shade::compile_context context;

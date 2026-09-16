@@ -59,9 +59,15 @@ function(claw_configure_warnings target)
     endif()
 endfunction()
 
-SET( LIB_SHADE_SOURCES
-       compiler/utils/cstring.hpp
-       compiler/utils/cstring.cpp
+SET( LIB_SHADE_SHARED shared/utils/cstring.hpp
+        shared/utils/cstring.cpp
+        shared/utils/ctmap.hpp
+        shared/instruction.hpp
+        shared/opcodes.hpp
+        shared/utils/flagutils.hpp)
+
+SET( LIB_SHADE_COMPILER
+
        compiler/lang/spelling.hpp
        compiler/parser/parser.cpp
        compiler/parser/parser.hpp
@@ -69,7 +75,6 @@ SET( LIB_SHADE_SOURCES
        compiler/parser/range_parser.hpp
        compiler/lexer/lexer.hpp
        compiler/lexer/lexer.cpp
-       compiler/utils/flagutils.hpp
        compiler/compilecontext.cpp
        compiler/compilecontext.hpp
        compiler/compiler.cpp
@@ -78,7 +83,7 @@ SET( LIB_SHADE_SOURCES
        compiler/meta/type_definition.hpp
        compiler/meta/program_structure.cpp
        compiler/meta/program_structure.hpp
-       compiler/utils/exceptions.hpp
+       compiler/exceptions.hpp
        compiler/meta/function_definition.cpp
        compiler/meta/function_definition.hpp
        compiler/meta/attribute.cpp
@@ -88,8 +93,6 @@ SET( LIB_SHADE_SOURCES
        compiler/meta/metadata.cpp
        compiler/meta/metadata.hpp
        compiler/lang/ops_and_actions.hpp
-       compiler/utils/ctmap.hpp
-       compiler/utils/exceptions.hpp
        compiler/meta/module_definition.cpp
        compiler/meta/module_definition.hpp
        compiler/lang/path_utils.hpp
@@ -101,17 +104,26 @@ SET( LIB_SHADE_SOURCES
         compiler/parser/typeexpressionparser.hpp
         compiler/parser/parse_methods.cpp
         compiler/parser/parse_methods.hpp
-        shared/value.hpp
-        runtime/vm/vmstate.hpp
-        shared/instruction.hpp
+        runtime/vm/opcode_execution.hpp
 )
 
-add_library(lib_shade OBJECT ${LIB_SHADE_SOURCES})
-target_include_directories(lib_shade PUBLIC compiler)
+SET( LIB_SHADE_RUNTIME
+        runtime/runtime.cpp
+        runtime/vm/vmstate.hpp
+        runtime/vm/register.hpp)
+
+add_library(lib_shade_shared OBJECT ${LIB_SHADE_SHARED})
+target_include_directories(lib_shade_shared PUBLIC ${CMAKE_SOURCE_DIR})
+
+add_library(lib_shade_compiler OBJECT ${LIB_SHADE_COMPILER})
+target_include_directories(lib_shade_compiler PUBLIC ${CMAKE_SOURCE_DIR})
+
+add_library(lib_shade_runtime OBJECT ${LIB_SHADE_RUNTIME})
+target_include_directories(lib_shade_runtime PUBLIC ${CMAKE_SOURCE_DIR})
 
 add_executable (shade main.cpp)
-target_include_directories(shade PUBLIC compiler)
-target_link_libraries(shade PRIVATE lib_shade)
+target_include_directories(shade PUBLIC {CMAKE_SOURCE_DIR})
+target_link_libraries(shade PRIVATE lib_shade_compiler lib_shade_runtime lib_shade_shared)
 
 add_subdirectory(vendor/googletest)
 enable_testing()
@@ -124,8 +136,8 @@ add_executable(tests tests/parser/namespace_tests.cpp
         tests/parser/parser_scan_tests.cpp
         tests/parser/module_definition_tests.cpp
         tests/parser/type_expression_parser_tests.cpp)
-target_include_directories(tests PUBLIC compiler)
-target_link_libraries(tests PRIVATE lib_shade)
+target_include_directories(tests PUBLIC ${CMAKE_SOURCE_DIR})
+target_link_libraries(tests PRIVATE lib_shade_compiler lib_shade_runtime lib_shade_shared)
 target_link_libraries(tests PRIVATE GTest::gtest_main )
 
 include(GoogleTest)

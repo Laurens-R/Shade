@@ -10,7 +10,7 @@
 #include <vector>
 
 
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 #include "../meta/metadata.hpp"
 

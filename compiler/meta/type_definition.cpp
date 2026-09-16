@@ -8,8 +8,8 @@
 
 #include <unordered_map>
 
-#include "../utils/exceptions.hpp"
-#include "../utils/ctmap.hpp"
+#include "../exceptions.hpp"
+#include "../../shared/utils/ctmap.hpp"
 #include "../lang/spelling.hpp"
 
 namespace shade {
@@ -204,7 +204,7 @@ namespace shade {
         type_definition result = {};
         result.is_primitive     = true;
         result.primitive_type   = primitive_type;
-        result.name             = typemap.at(primitive_type);
+        result.name             = typemap[primitive_type];
         result.module_path      = path_utils::get_global_path() + cstring::empty();
         result.full_path        = result.name;
 

@@ -3,7 +3,7 @@
 //
 
 #include "program_structure.hpp"
-#include "../utils/exceptions.hpp"
+#include "../exceptions.hpp"
 
 namespace shade {
     program_structure::program_structure() {
@@ -146,6 +146,7 @@ namespace shade {
     }
 
     module_definition * program_structure::get_module_definition(const cstring &module_path) {
+        if (module_path.is_empty()) return &_global_module;
         if (!_registered_module_mapping.contains(module_path.to_c_string())) return nullptr;
         return _registered_modules[_registered_module_mapping.at(module_path.to_c_string())];
     }

@@ -6,11 +6,11 @@
 #include "../lang/spelling.hpp"
 #include "parser_range_keys.hpp"
 #include "parse_methods.hpp"
-#include "utils/exceptions.hpp"
+#include "../exceptions.hpp"
 
 namespace shade {
 
-    type_expression type_expression_parser::parse(const std::vector<language_token> &tokens, size_t from_token_index, size_t to_token_index, compile_context &context, const cstring &current_namespace) {
+    std::expected<type_expression, type_expression_errors> type_expression_parser::parse(const std::vector<language_token> &tokens, size_t from_token_index, size_t to_token_index, compile_context &context, const cstring &current_namespace) {
         type_expression result;
         auto & parsers = parse_methods::get_instance();
 
@@ -40,7 +40,15 @@ namespace shade {
 
             auto & ps = context.get_program_structure();
 
-            // parse_result.contains_key(range_keys::type_expression_typename)
+            if (!parse_result.contains_key(range_keys::type_expression_typename)) return std::unexpected(type_expression_errors::core_type_not_in_expression);
+
+            auto core_type_name = parse_result.get_captured_range(range_keys::type_expression_typename).value();
+            auto core_type = ps.find_type_definition(tokens[core_type_name.from_token_index].text, current_namespace);
+
+
+            if (!core_type) return std::unexpected(type_expression_errors::core_type_not_found_in_namespace);
+            result.type = core_type;
+
         }
 
         return result;

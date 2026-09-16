@@ -5,9 +5,9 @@
 
 #include <gtest/gtest.h>
 
-#include <lexer/lexer.hpp>
-#include <parser/range_parser.hpp>
-#include <lang/spelling.hpp>
+#include <compiler/lexer/lexer.hpp>
+#include <compiler/parser/range_parser.hpp>
+#include <compiler/lang/spelling.hpp>
 
 TEST(range_capture, basic_match) {
     shade::compile_context context;

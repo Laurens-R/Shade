@@ -1,6 +1,6 @@
 #include "lexer.hpp"
 
-#include "../utils/flagutils.hpp"
+#include "../../shared/utils/flagutils.hpp"
 
 #include <string>
 

@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "../utils/cstring.hpp"
+#include "../../shared/utils/cstring.hpp"
 #include "../compilecontext.hpp"
 
 namespace shade {
@@ -66,7 +66,7 @@ namespace shade {
         };
 
         std::unordered_set<char> _special_symbols = {
-            '{', '}', '+', '-', '/', '*', '(', ')', '\'', '|', '&', '$', '!', '?', '@', ';', ':', '[', ']', '\\', '^', '=',
+            '{', '}', '+', '-', '/', '*', '(', ')', '\'', '|', '&', '$', '!', '?', '@', ';', '[', ']', '\\', '^', '=',
             ',', '%', '<', '>', '~'
         };
 
@@ -88,10 +88,7 @@ namespace shade {
             {'[', {"[]"}},
             {'+', {"++", "+="}},
             {'-', {"--", "-=", "->"}},
-            {'#', {"#label"}},
-            {':', {"::"}},
-            // '-' is deliberately NOT in _specialSymbols (a dedicated branch in Tokenize()
-            // disambiguates signed numbers), so its compound tokens '--' / '-=' are matched there.
+            {'#', {"#label"}}
         };
     private:
         cstring       _source;

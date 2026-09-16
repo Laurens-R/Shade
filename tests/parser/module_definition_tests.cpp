@@ -3,8 +3,8 @@
 //
 #include <gtest/gtest.h>
 
-#include <meta/module_definition.hpp>
-#include <meta/function_definition.hpp>
+#include <compiler/meta/module_definition.hpp>
+#include <compiler/meta/function_definition.hpp>
 
 TEST(module_definition, modules) {
     shade::module_definition global_module("a", "a");

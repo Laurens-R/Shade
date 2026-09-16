@@ -3,7 +3,7 @@
 //
 #include <gtest/gtest.h>
 
-#include <lexer/lexer.hpp>
+#include <compiler/lexer/lexer.hpp>
 
 TEST(lexer, basic_tokenization) {
     shade::compile_context context;
@@ -75,7 +75,7 @@ TEST(lexer, special_symbols_with_various_spacing) {
     shade::compile_context context;
     constexpr const char * source = R"(
         { } + -   / * () \
-        | &   $ ~ ? @ ; : [] '
+        | &   $ ~ ? @ ; [] '
         ^ - , % < >~
     )";
 

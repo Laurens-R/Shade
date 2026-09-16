@@ -6,7 +6,7 @@
 #define SHADE_OPERATIONS_HPP
 
 #include "../lexer/lexer.hpp"
-#include "../utils/ctmap.hpp"
+#include "../../shared/utils/ctmap.hpp"
 #include "spelling.hpp"
 
 namespace shade

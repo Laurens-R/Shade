@@ -5,7 +5,7 @@
 #ifndef SHADE_PIPELINE_H
 #define SHADE_PIPELINE_H
 
-#include "utils/cstring.hpp"
+#include "../shared/utils/cstring.hpp"
 
 namespace shade {
     class compiler {
