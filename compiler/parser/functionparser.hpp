@@ -13,6 +13,8 @@
 
 namespace shade {
     class function_parser {
+        private:
+            static bool validate_function_name(const std::vector<language_token> &tokens, const parsed_ranges &ranges, compile_context &context, function_definition &func);
         public:
             static bool parse(const std::vector<language_token> &tokens, const parsed_ranges & ranges, compile_context &context, function_definition & func);
     };

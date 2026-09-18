@@ -20,29 +20,53 @@ namespace shade
     struct function_definition;
 
     enum class ast_node_types {
-        module_definition,
+        binary_logic,
+        assignment,
+        conditional,
+        constant_reference,
+        constant_value,
+        extern_c_function_call,
+        extern_function_call,
+        function_call,
         function_definition,
+        module_definition,
+        operation,
+        return_statement,
         structure_definition,
         variable_definition,
         variable_reference,
-        constant_value,
-        constant_reference,
-        operation,
-        function_call,
-        extern_function_call,
-        extern_c_function_call
+        break_statement,
+        exit_statement,
+        continue_statement,
+        initializer_list,
+        alloc,
+        array_alloc,
+        free_statement,
+        sizeof_statement,
+        length_of_statement,
+        begin_precedence,
+        end_precedence,
+        string_subscript
     };
 
     struct ast_node
     {
         ast_node * parent;
         ast_node_types type;
-        std::vector<std::shared_ptr<ast_node>> children;
+        std::vector<ast_node> children;
         language_token token;
+        cstring value;
+        bool is_unary_operation;
+        bool is_binary_node;
 
-        ast_node * create_child(ast_node * parent);
-        std::optional<type_definition*> get_type_metadata(ast_node * parent);
-        std::optional<function_definition*> get_function_metadata(ast_node * parent);
+        void create_child(ast_node_types type);
+
+        void set_left_node(const ast_node &node);
+        void set_right_node(const ast_node &node);
+
+        ast_node *get_left_node();
+
+        ast_node *get_right_node();
     };
 } // shade
 

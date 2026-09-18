@@ -13,6 +13,15 @@
 #include "function_definition.hpp"
 
 namespace shade {
+    struct ast_node;
+
+    struct variable_definition {
+        cstring name = cstring::empty();
+        type_definition *related_type_information = {};
+        size_t offset = 0;
+        std::shared_ptr<ast_node> variable_expression;
+    };
+
     struct parsed_ranges;
 
     struct module_definition {
@@ -25,6 +34,7 @@ namespace shade {
             module_definition *find_namespace(const cstring &path);
         public:
 
+            std::vector<variable_definition> variables;
             cstring name;
             cstring full_path;
             parsed_ranges * related_token_capture = nullptr;

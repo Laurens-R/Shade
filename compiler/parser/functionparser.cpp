@@ -7,10 +7,65 @@
 #include "range_parser.hpp"
 #include "parser_range_keys.hpp"
 #include "../lang/spelling.hpp"
-
+#include "symbols.hpp"
 namespace shade {
+
+    bool function_parser::validate_function_name(const std::vector<language_token> &tokens, const parsed_ranges &ranges, compile_context &context, function_definition &func) {
+        size_t line = 0;
+        size_t column = 0;
+
+        if (ranges.contains_key(range_keys::function_name)) {
+            auto range = ranges.get_captured_range(range_keys::function_name).value();
+            line = tokens[range.from_token_index].line;
+            column = tokens[range.from_token_index].column;
+        }
+
+        //first check if the function name is valid.
+        if (!symbols::is_valid_identifier(func.name)) {
+
+            context.log_error(line, column, "Invalid function name");
+            return false;
+        }
+
+        auto & ps = context.get_program_structure();
+
+        if (func.is_method) {
+            auto type_def = ps.get_type_definition(func.parent_path);
+
+            if (type_def == nullptr) {
+                context.log_error(line, column, "Could not resolve parent type.");
+                return false;
+            }
+
+            for (auto & field : type_def->fields) {
+                if (field.name == func.name) {
+                    context.log_error(line, column, "Function name conflicts with field in parent scope.");
+                    return false;
+                }
+            }
+        } else {
+            auto module_def = ps.get_module_definition(func.parent_path);
+
+            if (module_def == nullptr) {
+                context.log_error(line, column, "Could not resolve parent module.");
+                return false;
+            }
+
+            for (auto & var : module_def->variables) {
+                if (var.name == func.name) {
+                    context.log_error(line, column, "Function name conflicts with variable in parent scope.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     bool function_parser::parse(const std::vector<language_token> &tokens, const parsed_ranges & ranges, compile_context &context, function_definition &func) {
-        //first parse function arguments
+        //first validate the name of the function
+        if (!validate_function_name(tokens, ranges, context, func)) return false;
+
+        //then parse all the arguments
         if (ranges.contains_key(range_keys::function_arguments)) {
             auto arguments_range = ranges.get_captured_range(range_keys::function_arguments).value();
 
@@ -57,6 +112,8 @@ namespace shade {
             func.return_type = return_type.value();
             func.has_return_type = true;
         }
+
+        //parse the body
 
         return true;
     }

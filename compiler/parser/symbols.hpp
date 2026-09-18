@@ -8,7 +8,8 @@
 
 namespace shade {
     class symbols {
-        static bool is_valid_identifier(const cstring &identifier);
+        public:
+            static bool is_valid_identifier(const cstring &identifier);
     };
 } // shade
 
