@@ -7,23 +7,7 @@
 
 namespace shade
 {
-    std::optional<type_definition*> ast_node::get_type_metadata(ast_node* parent)
-    {
-        if (metadata && metadata->get_type() == metadata_type::type)
-        {
-            return dynamic_cast<type_definition*>(metadata.get());
-        }
-
-        return std::nullopt;
-    }
-
-    std::optional<function_definition*> ast_node::get_function_metadata(ast_node* parent)
-    {
-        if (metadata && metadata->get_type() == metadata_type::function)
-        {
-            return dynamic_cast<function_definition*>(metadata.get());
-        }
-
-        return std::nullopt;
+    ast_node * ast_node::create_child(ast_node *parent) {
+        return nullptr;
     }
 } // shade

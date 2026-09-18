@@ -18,22 +18,22 @@ namespace shade {
         _captured_ranges_by_key.insert_or_assign(key.to_c_string(), _captured_ranges.size() - 1);
     }
 
-    std::optional<parsed_range> parsed_ranges::get_captured_range(const cstring &key) {
+    std::optional<parsed_range> parsed_ranges::get_captured_range(const cstring &key) const {
         if (!_captured_ranges_by_key.contains(key.to_c_string())) {
             return std::nullopt;
         }
         return _captured_ranges[_captured_ranges_by_key.at(key.to_c_string())];
     }
 
-    bool parsed_ranges::contains_key(const cstring &key) {
+    bool parsed_ranges::contains_key(const cstring &key) const  {
         return _captured_ranges_by_key.contains(key.to_c_string());
     }
 
-    size_t parsed_ranges::get_size() {
+    size_t parsed_ranges::get_size() const {
         return _captured_ranges.size();
     }
 
-    std::optional<parsed_range> parsed_ranges::get_captured_range_at(const size_t index) {
+    std::optional<parsed_range> parsed_ranges::get_captured_range_at(const size_t index) const {
         if (index >= _captured_ranges.size()) {
             return std::nullopt;
         }

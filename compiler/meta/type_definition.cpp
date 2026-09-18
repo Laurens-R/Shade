@@ -197,7 +197,7 @@ namespace shade {
             {primitive_types::i64, spelling::types::signed_int_64},
             {primitive_types::f32, spelling::types::float_32},
             {primitive_types::f64, spelling::types::float_64},
-            {primitive_types::string, spelling::types::string},
+            {primitive_types::string, spelling::types::keyword_string},
             {primitive_types::boolean, spelling::types::boolean}
         });
 
@@ -222,9 +222,5 @@ namespace shade {
         result.related_node = related_node;
 
         return result;
-    }
-
-    metadata_type type_definition::get_type() {
-        return metadata_type::type;
     }
 }

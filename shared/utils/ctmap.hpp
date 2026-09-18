@@ -55,7 +55,7 @@ namespace shade {
 
     // Helper factory function:
     template <typename TKey, typename TValue, std::size_t Capacity = 256, std::size_t N>
-    constexpr dense_enum_map<TKey, TValue, Capacity> make_map(
+    consteval dense_enum_map<TKey, TValue, Capacity> make_map(
         const std::pair<TKey, TValue> (&items)[N], 
         TValue default_value = TValue{}
     ) {

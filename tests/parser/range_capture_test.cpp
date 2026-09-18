@@ -256,7 +256,7 @@ TEST(range_capture, module_test) {
     const auto tokens = lex.tokenize();
 
     shade::range_parser capture;
-    capture.match_and_capture_token(shade::spelling::modules::module_name, "mkeyword")
+    capture.match_and_capture_token(shade::spelling::modules::keyword_module, "mkeyword")
     .capture_tokens_by_count(1, "mname")
     .capture_range(shade::spelling::modules::begin_body, shade::spelling::modules::end_body, "mbody");
     auto result = capture.try_capture(tokens, 0, tokens.size() - 1);

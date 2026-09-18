@@ -8,16 +8,8 @@
 
 #include "../../vendor/sse2neon/sse2neon.h"
 
-namespace shade {
 
-    inline constexpr const uint8_t REG_A = 0;
-    inline constexpr const uint8_t REG_B = 0;
-    inline constexpr const uint8_t REG_C = 0;
-    inline constexpr const uint8_t REG_D = 0;
-    inline constexpr const uint8_t REG_E = 0;
-    inline constexpr const uint8_t REG_F = 0;
-    inline constexpr const uint8_t REG_G = 0;
-    inline constexpr const uint8_t REG_H = 0;
+namespace shade {
 
     struct vm_register {
         union {

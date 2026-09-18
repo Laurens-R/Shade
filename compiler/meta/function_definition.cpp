@@ -8,11 +8,6 @@
 
 namespace shade
 {
-    metadata_type function_definition::get_type()
-    {
-        return metadata_type::function;
-    }
-
     function_definition function_definition::create(const cstring &full_path, bool is_method) {
         function_definition result;
 

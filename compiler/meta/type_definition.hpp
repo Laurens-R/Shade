@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "function_definition.hpp"
-#include "metadata.hpp"
 
 #include <shared/utils/cstring.hpp>
 #include <vendor/xxhash/xxhash.hpp>
@@ -63,7 +62,7 @@ namespace shade {
     /**
      * A type_definition represents any type in the language. Even primitive types.
      */
-    struct type_definition final : public metadata {
+    struct type_definition final {
 
         /**
          * All generics that have been specified as potential arguments for the type.
@@ -212,27 +211,6 @@ namespace shade {
          */
         static type_definition create(const cstring &full_path, ast_node *related_node = nullptr, size_t alignment = sizeof(uintptr_t));
 
-        /**
-         * Returns the type of the type definition. (Required to make decisions during parsing)
-         * @return The type of the type definition.
-         */
-        metadata_type get_type() override;
-    };
-
-    /**
-     * A type_expression represents every type of type indicator in the language.
-     * No matter if it's related to a funtion argument, a variable declaration, a struct field
-     * or any other place where a type is defined on one shape or the other.
-     */
-    struct type_expression {
-        type_definition *type = nullptr;
-        uint64_t fixed_array_size = 0;
-        bool is_owned = false;
-        bool is_const = false;
-        bool is_array = false;
-        bool is_ptr = false;
-        bool is_ref = false;
-        bool is_dynamic_array = false;
     };
 }
 

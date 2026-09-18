@@ -16,6 +16,9 @@ namespace shade {
 
         auto parse_result = parsers.type_expressions.try_capture(tokens, from_token_index, to_token_index);
 
+        result.token_index_from = parse_result.range_from_index;
+        result.token_index_to = parse_result.range_to_index;
+
         if (parse_result.matched) {
             result.is_owned = parse_result.contains_key(range_keys::type_expression_owning);
             result.is_const = parse_result.contains_key(range_keys::type_expression_constant);

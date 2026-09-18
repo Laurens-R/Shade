@@ -61,20 +61,20 @@ namespace shade {
      */
     class lexer {
     public:
-        std::unordered_set<char> _delimiters = {
+        static inline std::unordered_set<char> _delimiters = {
             ' ', '\t', '\r'
         };
 
-        std::unordered_set<char> _special_symbols = {
+        static inline std::unordered_set<char> _special_symbols = {
             '{', '}', '+', '-', '/', '*', '(', ')', '\'', '|', '&', '$', '!', '?', '@', ';', '[', ']', '\\', '^', '=',
             ',', '%', '<', '>', '~'
         };
 
-        std::unordered_set<char> _ignored_symbols = {
+        static inline std::unordered_set<char> _ignored_symbols = {
             '\n'
         };
 
-        std::unordered_map<char, std::vector<cstring>> _extended_tokens = {
+        static inline std::unordered_map<char, std::vector<cstring>> _extended_tokens = {
             {'&', {"&&", "&="}},
             {'|', {"||", "|="}},
             {'=', {"=="}},

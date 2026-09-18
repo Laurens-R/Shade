@@ -8,8 +8,6 @@
 
 #include "instruction.hpp"
 
-#include "../utils"
-
 namespace shade {
 
 
@@ -31,6 +29,14 @@ namespace shade {
 
         //peek at the value on the stack and store it in the provided register or memory address
         peek,
+
+        load,
+
+        store,
+
+        sload,
+
+        sstore,
 
         //move an immediate value onto the provided register
         mov,

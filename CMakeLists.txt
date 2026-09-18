@@ -90,9 +90,7 @@ SET( LIB_SHADE_COMPILER
        compiler/meta/attribute.hpp
        compiler/ast/ast_node.cpp
        compiler/ast/ast_node.hpp
-       compiler/meta/metadata.cpp
-       compiler/meta/metadata.hpp
-       compiler/lang/ops_and_actions.hpp
+        compiler/lang/ops_and_actions.hpp
        compiler/meta/module_definition.cpp
        compiler/meta/module_definition.hpp
        compiler/lang/path_utils.hpp
@@ -105,6 +103,18 @@ SET( LIB_SHADE_COMPILER
         compiler/parser/parse_methods.cpp
         compiler/parser/parse_methods.hpp
         runtime/vm/opcode_execution.hpp
+        compiler/emit/emit.cpp
+        compiler/emit/emit.hpp
+        runtime/vm/stack.cpp
+        runtime/vm/stack.hpp
+        shared/vmconstants.hpp
+        compiler/parser/functionparser.cpp
+        compiler/parser/functionparser.hpp
+        compiler/meta/type_expression.hpp
+        compiler/parser/expressionparser.cpp
+        compiler/parser/expressionparser.hpp
+        compiler/parser/symbols.cpp
+        compiler/parser/symbols.hpp
 )
 
 SET( LIB_SHADE_RUNTIME

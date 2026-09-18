@@ -99,12 +99,12 @@ namespace shade
             {spelling::comparisons::comparison_less_equal, ops_and_actions::compare_less_equal},
 
             //actions
-            {spelling::actions::return_action, ops_and_actions::return_value},
-            {spelling::conditional::if_start, ops_and_actions::start_if_block},
-            {spelling::conditional::if_else, ops_and_actions::start_else_block},
-            {spelling::loops::loop_for, ops_and_actions::start_for_loop},
-            {spelling::loops::loop_foreach, ops_and_actions::start_foreach_loop},
-            {spelling::loops::loop_while, ops_and_actions::start_while_loop}
+            {spelling::actions::keyword_return, ops_and_actions::return_value},
+            {spelling::conditional::keyword_if, ops_and_actions::start_if_block},
+            {spelling::conditional::keyword_else, ops_and_actions::start_else_block},
+            {spelling::loops::keyword_for, ops_and_actions::start_for_loop},
+            {spelling::loops::keyword_foreach, ops_and_actions::start_foreach_loop},
+            {spelling::loops::keyword_while, ops_and_actions::start_while_loop}
         });
 
         if (const auto result = action_map.find(token.text.to_std_string_view()); result != nullptr)

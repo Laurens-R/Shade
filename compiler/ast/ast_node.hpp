@@ -12,7 +12,6 @@
 
 #include "../../shared/utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
-#include "../meta/metadata.hpp"
 
 namespace shade
 {
@@ -39,7 +38,6 @@ namespace shade
         ast_node * parent;
         ast_node_types type;
         std::vector<std::shared_ptr<ast_node>> children;
-        std::shared_ptr<metadata> metadata;
         language_token token;
 
         ast_node * create_child(ast_node * parent);

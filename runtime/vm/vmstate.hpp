@@ -7,6 +7,7 @@
 
 #include "register.hpp"
 #include "../vendor/sse2neon/sse2neon.h"
+#include <shared/vmconstants.hpp>
 
 namespace shade {
     struct vmstate {

@@ -211,7 +211,6 @@ TEST(type_expression_parser, basic_dynamic_array) {
     ASSERT_EQ(detected_type->is_owned, false);
     ASSERT_EQ(detected_type->is_ptr, false);
     ASSERT_EQ(detected_type->is_ref, false);
-
 }
 
 

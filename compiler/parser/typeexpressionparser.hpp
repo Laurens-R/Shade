@@ -6,12 +6,12 @@
 #define SHADE_TYPEEXPRESSIONPARSER_HPP
 
 #include "range_parser.hpp"
+#include "../meta/type_expression.hpp"
 
 namespace shade {
     enum class type_expression_errors {
         core_type_not_in_expression,
-        core_type_not_found_in_namespace,
-
+        core_type_not_found_in_namespace
     };
 
     class type_expression_parser {

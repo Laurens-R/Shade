@@ -12,12 +12,13 @@
 
 
 namespace shade {
-    struct alignas(16) safe_reference_storage {
+    struct alignas(16) ref_storage {
         std::byte * data;
         uint64_t size;
     };
 
-    union store_64 {
+    union value_64 {
+        std::byte * ptr;
         uint64_t u64;
         int64_t i64;
         uint32_t u32[2];
@@ -33,7 +34,7 @@ namespace shade {
 
     struct alignas(16) vm_instruction {
         union {
-            safe_reference_storage ref;
+            ref_storage ref;
             std::byte * ptr[2];
             __m128 simd128;
             uint64_t u64[2];
@@ -50,20 +51,7 @@ namespace shade {
         } data{};
 
         struct {
-            union {
-                std::byte * ptr;
-                uint64_t u64;
-                int64_t i64;
-                uint32_t u32[2];
-                int32_t i32[2];
-                uint16_t u16[4];
-                int16_t i16[4];
-                uint8_t u8[8];
-                int8_t i8[8];
-
-                double f64;
-                float f32[2];
-            } imm;
+            value_64 imm;
 
             struct {
                 uint8_t opcode;

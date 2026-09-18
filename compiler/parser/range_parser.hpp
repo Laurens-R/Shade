@@ -37,13 +37,13 @@ namespace shade {
 
             void add_captured_range(size_t from, size_t to, const cstring &key);
 
-            std::optional<parsed_range> get_captured_range(const cstring &key);
+            std::optional<parsed_range> get_captured_range(const cstring &key) const;
 
-            bool contains_key(const cstring &key);
+            bool contains_key(const cstring &key) const;
 
-            size_t get_size();
+            size_t get_size() const;
 
-            std::optional<parsed_range> get_captured_range_at(const size_t index);
+            std::optional<parsed_range> get_captured_range_at(const size_t index) const;
     };
 
     /**
