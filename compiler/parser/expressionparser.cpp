@@ -244,6 +244,11 @@ namespace shade {
             }
         }
 
+        //todo: go through all remaining tokens
+        //todo: if a non_literal is found check if it refers to a variable, field, function or method.
+        //todo: if they do, go to the appropriate subparser where need (eg; for resolving expressions which are passed
+        //as function arguments for example.
+
 
         if (!assignment_indices.empty()) {}
 
