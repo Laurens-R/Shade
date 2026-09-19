@@ -11,6 +11,8 @@
 #include "../exceptions.hpp"
 #include "../../shared/utils/ctmap.hpp"
 #include "../lang/spelling.hpp"
+#include "module_definition.hpp"
+#include "../lang/path_utils.hpp"
 
 namespace shade {
     size_t type_definition::get_size() const {
@@ -53,8 +55,8 @@ namespace shade {
                 return 0;
             }
 
-            auto& last_field = fields.back();
-            return last_field.offset + last_field.related_type_information->get_size();
+            auto &last_field = fields.back();
+            return last_field.offset + last_field.type_declaration.type->get_size();
         }
 
         if (is_enum) {
@@ -77,42 +79,57 @@ namespace shade {
     void type_definition::calculate_offsets() {
         size_t current_offset = 0;
 
-        for (auto& field : fields) {
-            auto field_size       = field.related_type_information->get_size();
+        for (auto &field: fields) {
+            auto field_size = field.type_declaration.type->get_size();
             auto current_boundary = current_offset % alignment;
-            auto remaining_bytes  = alignment - current_boundary;
+            auto remaining_bytes = alignment - current_boundary;
 
             if (field_size > alignment) {
                 //field is bigger than the alignment
-                field.offset   = current_offset;
+                field.offset = current_offset;
                 current_offset += remaining_bytes + field_size;
                 continue;
             } else {
                 //if we need to make it fit the natural alignment of the field
                 size_t required_shift = remaining_bytes % field_size;
-                current_offset        += required_shift;
-                field.offset          = current_offset;
-                current_offset        += field_size;
+                current_offset += required_shift;
+                field.offset = current_offset;
+                current_offset += field_size;
             }
         }
     }
 
-    void type_definition::add_field(const cstring& field_name, type_definition* type) {
-        if (type == nullptr) {
+    void type_definition::add_field(const cstring &field_name, const type_expression &type) {
+        if (type.type == nullptr) {
             throw compiler_exception("add_field: provided type was null.");
         }
 
-        size_t current_offset   = fields.empty() ? 0 : fields.back().offset;
-        auto   current_boundary = current_offset % alignment;
-        auto   remaining_bytes  = alignment - current_boundary;
-        size_t required_shift   = remaining_bytes % type->get_size();
-        current_offset          += required_shift;
+        size_t current_offset = fields.empty() ? 0 : fields.back().offset;
+        auto current_boundary = current_offset % alignment;
+        auto remaining_bytes = alignment - current_boundary;
+        size_t required_shift = remaining_bytes % type.type->get_size();
+        current_offset += required_shift;
+
+        variable_definition field;
+        field.name = field_name;
+        field.type_declaration = type;
+        field.offset = current_offset;
 
         fields.push_back({
             .name = name,
-            .related_type_information = type,
+            .type_declaration = type,
             .offset = current_offset
         });
+    }
+
+    variable_definition *type_definition::find_field(const cstring &name) {
+        for (auto &variable: fields) {
+            if (variable.name == name) {
+                return &variable;
+            }
+        }
+
+        return nullptr;
     }
 
     function_definition *type_definition::add_method(const function_definition &func_def) {
@@ -125,9 +142,19 @@ namespace shade {
         return added_method;
     }
 
+    function_definition * type_definition::find_method(const cstring &name) {
+        for (auto &method: methods) {
+            if (method.name == name) {
+                return &method;
+            }
+        }
+
+        return nullptr;
+    }
+
     bool type_definition::are_fields_valid() const {
-        for (auto& field : fields) {
-            if (field.related_type_information == nullptr) {
+        for (auto &field: fields) {
+            if (field.type_declaration.type == nullptr) {
                 return false;
             }
         }
@@ -135,12 +162,12 @@ namespace shade {
         return true;
     }
 
-    std::expected<type_definition, generics_error> type_definition::monomorphize(const std::vector<type_definition*> types) {
+    std::expected<type_definition, generics_error> type_definition::monomorphize(const std::vector<type_definition *> types) {
         if (generics.empty()) {
             return std::unexpected(generics_error::not_a_generic_type);
         }
 
-        auto generic_count       = generics.size();
+        auto generic_count = generics.size();
         auto provided_type_count = types.size();
 
         if (generic_count != provided_type_count) {
@@ -153,9 +180,9 @@ namespace shade {
 
         type_definition new_type = *this;
 
-        auto check_for_known_generics = [&](const cstring& name) -> std::optional<size_t> {
+        auto check_for_known_generics = [&](const cstring &name) -> std::optional<size_t> {
             for (size_t i = 0; i < generics.size(); i++) {
-                auto& generic = generics.at(i);
+                auto &generic = generics.at(i);
                 if (generic == name) {
                     return i;
                 }
@@ -163,16 +190,16 @@ namespace shade {
             return std::nullopt;
         };
 
-        for (auto& field : fields) {
-            if (field.related_type_information->is_generic_type) {
-                auto found_generic = check_for_known_generics(field.related_type_information->name);
+        for (auto &field: fields) {
+            if (field.type_declaration.type->is_generic_type) {
+                auto found_generic = check_for_known_generics(field.type_declaration.type->name);
 
                 if (!found_generic.has_value()) {
                     continue;
                 }
 
-                field.related_type_information = types.at(found_generic.value());
-                new_type.name                  += cstring("$") + field.related_type_information->name;
+                field.type_declaration.type = types.at(found_generic.value());
+                new_type.name += cstring("$") + field.type_declaration.type->name;
             }
         }
 
@@ -202,23 +229,23 @@ namespace shade {
         });
 
         type_definition result = {};
-        result.is_primitive     = true;
-        result.primitive_type   = primitive_type;
-        result.name             = typemap[primitive_type];
-        result.module_path      = path_utils::get_global_path() + cstring::empty();
-        result.full_path        = result.name;
+        result.is_primitive = true;
+        result.primitive_type = primitive_type;
+        result.name = typemap[primitive_type];
+        result.module_path = path_utils::get_global_path() + cstring::empty();
+        result.full_path = result.name;
 
         return result;
     }
 
-    type_definition type_definition::create(const cstring& full_path, ast_node* related_node, size_t alignment) {
+    type_definition type_definition::create(const cstring &full_path, ast_node *related_node, size_t alignment) {
         type_definition result;
 
-        result.name         = path_utils::get_object_from_path(full_path);
-        result.full_path    = full_path;
-        result.module_path  = path_utils::get_parent_namespace_from_path(full_path);
-        result.is_struct    = true;
-        result.alignment    = alignment;
+        result.name = path_utils::get_object_from_path(full_path);
+        result.full_path = full_path;
+        result.module_path = path_utils::get_parent_namespace_from_path(full_path);
+        result.is_struct = true;
+        result.alignment = alignment;
         result.related_node = related_node;
 
         return result;

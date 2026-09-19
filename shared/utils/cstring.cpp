@@ -46,7 +46,7 @@ namespace shade {
     cstring::cstring(const char c) {
         alloc(2);
         _str.get()[0]  = c;
-        _currentOffset = 1;
+        _current_offset = 1;
     }
 
     cstring::cstring(const char* initialValue) {
@@ -56,7 +56,7 @@ namespace shade {
 #else
         strncpy_s(_str.get(), _capacity, initialValue, _capacity - 1);
 #endif
-        _currentOffset = std::strlen(initialValue);
+        _current_offset = std::strlen(initialValue);
     }
 
     cstring::cstring(const std::string& initialValue) {
@@ -66,7 +66,7 @@ namespace shade {
 #else
         strncpy_s(_str.get(), _capacity, initialValue.c_str(), _capacity - 1);
 #endif
-        _currentOffset = initialValue.length();
+        _current_offset = initialValue.length();
     }
 
     cstring::cstring(const size_t initialLength) {
@@ -77,7 +77,7 @@ namespace shade {
         alloc(length, /*cleanMemory=*/false);
         std::memcpy(_str.get(), data, length);
         _str.get()[length] = '\0';
-        _currentOffset     = length;
+        _current_offset     = length;
     }
 
     cstring::cstring(const cstring& other) {
@@ -87,7 +87,7 @@ namespace shade {
 #else
         strncpy_s(_str.get(), _capacity, other.to_c_string(), other.length());
 #endif
-        _currentOffset = other.length();
+        _current_offset = other.length();
     }
 
     cstring::cstring(const cstring& other, const size_t bufferReservation) {
@@ -95,25 +95,25 @@ namespace shade {
         const auto otherLen = other.length();
         std::memcpy(_str.get(), other.to_c_string(), otherLen);
         _str.get()[otherLen] = '\0';
-        _currentOffset       = otherLen;
+        _current_offset       = otherLen;
     }
 
     cstring::cstring(cstring&& other) noexcept
         : _capacity(other._capacity),
-          _currentOffset(other._currentOffset),
+          _current_offset(other._current_offset),
           _str(std::move(other._str)) {
         //Leave `other` in a valid, empty (null-buffer) state: it may only be destroyed or reassigned.
         other._capacity      = 0;
-        other._currentOffset = 0;
+        other._current_offset = 0;
     }
 
     auto cstring::operator=(cstring&& other) noexcept -> cstring& {
         if (&other != this) {
             _str           = std::move(other._str); //frees our old buffer, steals theirs — no allocation.
             _capacity      = other._capacity;
-            _currentOffset = other._currentOffset;
+            _current_offset = other._current_offset;
             other._capacity      = 0;
-            other._currentOffset = 0;
+            other._current_offset = 0;
         }
         return *this;
     }
@@ -124,7 +124,7 @@ namespace shade {
             //overflow when assigning a SHORTER string onto a longer one. We overwrite it anyway.
             _str.reset();
             _capacity      = 0;
-            _currentOffset = 0;
+            _current_offset = 0;
 
             alloc(other.capacity());
             std::memset(_str.get(), 0, _capacity);
@@ -134,7 +134,7 @@ namespace shade {
 #else
             strncpy_s(_str.get(), _capacity, other.to_c_string(), other.length());
 #endif
-            _currentOffset = other.length();
+            _current_offset = other.length();
         }
 
         return *this;
@@ -151,7 +151,7 @@ namespace shade {
 #else
         strncpy_s(_str.get(), _capacity, other, _capacity - 1);
 #endif
-        _currentOffset = len;
+        _current_offset = len;
         return *this;
     }
 
@@ -166,7 +166,7 @@ namespace shade {
 #else
         strncpy_s(_str.get(), _capacity, other.data(), _capacity - 1);
 #endif
-        _currentOffset = len;
+        _current_offset = len;
         return *this;
     }
 
@@ -220,7 +220,7 @@ namespace shade {
     }
 
     auto cstring::at(const size_t index) const -> char& {
-        if (index < _currentOffset) {
+        if (index < _current_offset) {
             return _str.get()[index];
         }
 
@@ -232,25 +232,25 @@ namespace shade {
     }
 
     auto cstring::length() const -> size_t {
-        return _currentOffset;
+        return _current_offset;
     }
 
     auto cstring::append(const char c) -> void {
-        if (_currentOffset + 1 >= _capacity) {
+        if (_current_offset + 1 >= _capacity) {
             alloc(_capacity * 2);
         }
 
-        _str.get()[_currentOffset] = c;
-        _currentOffset++;
-        _str.get()[_currentOffset] = '\0'; //keep NUL-terminated; ToString()/strcpy rely on it
+        _str.get()[_current_offset] = c;
+        _current_offset++;
+        _str.get()[_current_offset] = '\0'; //keep NUL-terminated; ToString()/strcpy rely on it
     }
 
     auto cstring::append(const cstring& other) -> void {
         const auto otherLen = other.length();
-        alloc(_currentOffset + otherLen + 1, false);
-        std::memcpy(&_str.get()[_currentOffset], other.to_c_string(), otherLen);
-        _currentOffset += otherLen;
-        _str.get()[_currentOffset] = '\0'; //keep NUL-terminated; ToString()/strcmp rely on it
+        alloc(_current_offset + otherLen + 1, false);
+        std::memcpy(&_str.get()[_current_offset], other.to_c_string(), otherLen);
+        _current_offset += otherLen;
+        _str.get()[_current_offset] = '\0'; //keep NUL-terminated; ToString()/strcmp rely on it
     }
 
     auto cstring::append(const std::string& other) -> void {
@@ -311,16 +311,16 @@ namespace shade {
     }
 
     auto cstring::to_uppper() const -> cstring {
-        cstring result(_currentOffset);
-        for (size_t i = 0; i < _currentOffset; ++i) {
+        cstring result(_current_offset);
+        for (size_t i = 0; i < _current_offset; ++i) {
             result.append(static_cast<char>(std::toupper(static_cast<unsigned char>(_str.get()[i]))));
         }
         return result;
     }
 
     auto cstring::to_lower() const -> cstring {
-        cstring result(_currentOffset);
-        for (size_t i = 0; i < _currentOffset; ++i) {
+        cstring result(_current_offset);
+        for (size_t i = 0; i < _current_offset; ++i) {
             result.append(static_cast<char>(std::tolower(static_cast<unsigned char>(_str.get()[i]))));
         }
         return result;
@@ -383,12 +383,48 @@ namespace shade {
         return result;
     }
 
+    auto cstring::is_hex_integer() const -> bool {
+        const char* str = _str.get();
+
+        if (length() < 3 || str[0] != '0' || (str[1] != 'x')) {
+            return false;
+        }
+
+        for (size_t i = 2; i < _current_offset; ++i) {
+            bool is_digit = std::isdigit(str[i]);
+            bool is_hex   = (str[i] >= 'a' && str[i] <= 'f') || (str[i] >= 'A' && str[i] <= 'F');
+            bool is_seperator = str[i] == '_';
+            if (!is_digit && !is_hex && !is_seperator) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    auto cstring::is_binary_integer() const -> bool {
+        const char* str = _str.get();
+
+        if (length() < 3 || str[0] != '0' || (str[1] != 'b')) {
+            return false;
+        }
+
+        for (size_t i = 2; i < _current_offset; ++i) {
+            bool is_binary   = (str[i] == '0' || str[i] <= '1');
+            bool is_seperator = str[i] == '_';
+            if (!is_binary && !is_seperator) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     auto cstring::is_signed_int() const -> bool {
         const char* str = _str.get();
 
-        if (_currentOffset == 1 && str[0] == '-') return false;
+        if (_current_offset == 1 && str[0] == '-') return false;
 
-        for (size_t i = 0; i < _currentOffset; ++i) {
+        for (size_t i = 0; i < _current_offset; ++i) {
             if (i == 0) {
                 if (str[i] != '-') {
                     if (!std::isdigit(str[i])) {
@@ -407,7 +443,7 @@ namespace shade {
 
     auto cstring::is_unsigned_int() const -> bool {
         const char* str = _str.get();
-        for (size_t i = 0; i < _currentOffset; ++i) {
+        for (size_t i = 0; i < _current_offset; ++i) {
             if (!std::isdigit(str[i])) {
                 return false;
             }
@@ -428,7 +464,7 @@ namespace shade {
         //("123") is still IsFloat()==true — the literal parser checks IsSignedInt/IsUnsignedInt first, so
         //integers classify as integers; float classification only wins when a `.` or exponent is present.
         const char*  str = _str.get();
-        const size_t n   = _currentOffset;
+        const size_t n   = _current_offset;
         if (n == 0) return false;
 
         size_t i = 0;
@@ -560,7 +596,7 @@ namespace shade {
     }
 
     auto cstring::is_empty() const -> bool {
-        return _currentOffset == 0;
+        return _current_offset == 0;
     }
 
     auto cstring::to_u8() const -> std::uint8_t {

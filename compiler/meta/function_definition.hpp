@@ -11,6 +11,7 @@
 
 #include "attribute.hpp"
 #include "type_expression.hpp"
+#include "variable_definition.hpp"
 
 namespace shade
 {
@@ -30,6 +31,7 @@ namespace shade
     {
         std::vector<function_argument> arguments;
         std::vector<attribute> attributes;
+        std::vector<variable_definition> variables;
         cstring name;
         cstring full_path;
         cstring parent_path;
@@ -44,6 +46,10 @@ namespace shade
         bool is_method = false;
 
         static function_definition create(const cstring &full_path, bool is_method);
+
+        void add_variable(variable_definition &var);
+        variable_definition *find_variable(const cstring &name);
+       
     };
 } // shade
 

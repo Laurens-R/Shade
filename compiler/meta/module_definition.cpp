@@ -254,4 +254,31 @@ namespace shade {
 
         return added_function;
     }
+
+    void module_definition::add_variable(variable_definition &var) {
+        if (variables.empty()) {
+            var.offset = 0;
+        } else {
+            auto & last_var = variables.back();
+            auto last_offset = last_var.offset;
+
+            if (var.type_declaration.type == 0) {
+                throw compiler_exception("Internal compiler error: type is null while adding variable");
+            }
+
+            var.offset = last_offset +  var.type_declaration.type->get_size();
+        }
+
+        variables.push_back(var);
+    }
+
+    variable_definition * module_definition::find_variable(const cstring &name) {
+        for (auto & variable : variables) {
+            if (variable.name == name) {
+                return &variable;
+            }
+        }
+
+        return nullptr;
+    }
 } // shade

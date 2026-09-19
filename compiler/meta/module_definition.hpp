@@ -11,16 +11,11 @@
 #include "../../shared/utils/cstring.hpp"
 #include "type_definition.hpp"
 #include "function_definition.hpp"
+#include "variable_definition.hpp"
+#include "compiler/exceptions.hpp"
 
 namespace shade {
     struct ast_node;
-
-    struct variable_definition {
-        cstring name = cstring::empty();
-        type_definition *related_type_information = {};
-        size_t offset = 0;
-        std::shared_ptr<ast_node> variable_expression;
-    };
 
     struct parsed_ranges;
 
@@ -30,7 +25,6 @@ namespace shade {
             std::unique_ptr<std::deque<module_definition>> _child_modules;
             std::deque<type_definition> _child_types;
             std::deque<function_definition> _child_functions;
-
             module_definition *find_namespace(const cstring &path);
         public:
 
@@ -63,6 +57,10 @@ namespace shade {
             type_definition *add_child_type(const type_definition &type);
 
             function_definition *add_child_function(const function_definition &func);
+
+            void add_variable(variable_definition &var);
+
+            variable_definition *find_variable(const cstring &name);
     };
 } // shade
 

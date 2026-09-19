@@ -25,6 +25,10 @@ namespace shade {
         bool is_ptr = false;
         bool is_ref = false;
         bool is_dynamic_array = false;
+
+        bool is_void() {
+            return type == nullptr;
+        }
     };
 }
 

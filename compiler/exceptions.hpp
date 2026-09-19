@@ -6,7 +6,6 @@
 #define SHADE_EXCEPTIONS_HPP
 
 #include <stdexcept>
-#include "compilecontext.hpp"
 
 namespace shade
 {

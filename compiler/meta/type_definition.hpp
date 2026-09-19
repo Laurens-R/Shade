@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "function_definition.hpp"
+#include "variable_definition.hpp"
 
 #include <shared/utils/cstring.hpp>
 #include <vendor/xxhash/xxhash.hpp>
@@ -36,12 +37,6 @@ namespace shade {
     };
 
     struct type_definition;
-
-    struct type_field_definition {
-        cstring name = cstring::empty();
-        type_definition *related_type_information = {};
-        size_t offset = 0;
-    };
 
     struct enum_entry {
         cstring name = cstring::empty();
@@ -72,7 +67,7 @@ namespace shade {
         /**
          * All the fields that belong to the type.
          */
-        std::vector<type_field_definition> fields;
+        std::vector<variable_definition> fields;
 
         /**
          * All the methods that belong to the type.
@@ -179,7 +174,9 @@ namespace shade {
          * @param field_name The name of the field.
          * @param type The type of the field.
          */
-        void add_field(const cstring &field_name, type_definition *type);
+        void add_field(const cstring &field_name, const type_expression &type);
+
+        variable_definition *find_field(const cstring &name);
 
         /**
          * Adds a method to the type definition.
@@ -187,6 +184,8 @@ namespace shade {
          * @return A pointer to the added method.
          */
         function_definition *add_method(const function_definition &func_def);
+
+        function_definition *find_method(const cstring & name);
 
         /**
          * Monomorphizes the type definition based on the provided types.

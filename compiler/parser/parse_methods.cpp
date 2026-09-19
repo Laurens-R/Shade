@@ -82,6 +82,7 @@ namespace shade {
                         .optional_match_and_capture_token(spelling::types::dynamic_array, range_keys::type_expression_dynamic_array_range)
                         .optional_capture_range(spelling::types::array_index_begin, spelling::types::array_index_end, range_keys::type_expression_fixed_array_range);
 
+        function_arguments.capture_range(spelling::functions::begin_arguments, spelling::functions::end_arguments, range_keys::function_arguments);
 
         are_parsers_initialized = true;
     }

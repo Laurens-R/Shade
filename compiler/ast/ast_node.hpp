@@ -46,18 +46,22 @@ namespace shade
         length_of_statement,
         begin_precedence,
         end_precedence,
-        string_subscript
+        string_subscript,
+        unknown
     };
 
     struct ast_node
     {
-        ast_node * parent;
-        ast_node_types type;
+        ast_node * parent = nullptr;
+        ast_node_types type = ast_node_types::unknown;
         std::vector<ast_node> children;
-        language_token token;
+        language_token * token = nullptr;
+        type_definition * related_type = nullptr;
+        type_expression * related_type_expression = nullptr;
+        function_definition * related_function_definition = nullptr;
         cstring value;
-        bool is_unary_operation;
-        bool is_binary_node;
+        bool is_unary_operation = false;
+        bool is_binary_node = false;
 
         void create_child(ast_node_types type);
 

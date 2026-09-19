@@ -7,7 +7,7 @@
 #include "range_parser.hpp"
 #include "parser_range_keys.hpp"
 #include "../lang/spelling.hpp"
-#include "symbols.hpp"
+#include "symbol_utils.hpp"
 namespace shade {
 
     bool function_parser::validate_function_name(const std::vector<language_token> &tokens, const parsed_ranges &ranges, compile_context &context, function_definition &func) {
@@ -21,7 +21,7 @@ namespace shade {
         }
 
         //first check if the function name is valid.
-        if (!symbols::is_valid_identifier(func.name)) {
+        if (!symbol_utils::is_valid_identifier(func.name)) {
 
             context.log_error(line, column, "Invalid function name");
             return false;
