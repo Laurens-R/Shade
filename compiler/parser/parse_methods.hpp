@@ -27,6 +27,7 @@ namespace shade {
         range_parser statements;
         range_parser type_expressions;
         range_parser function_arguments;
+        range_parser sub_expressions;
 
         parse_methods();
 

@@ -116,6 +116,10 @@ SET( LIB_SHADE_COMPILER
         compiler/parser/symbol_utils.cpp
         compiler/parser/symbol_utils.hpp
         compiler/meta/variable_definition.hpp
+        compiler/parser/conditional_parser.cpp
+        compiler/parser/conditional_parser.hpp
+        compiler/parser/body_parser.cpp
+        compiler/parser/body_parser.hpp
 )
 
 SET( LIB_SHADE_RUNTIME

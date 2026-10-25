@@ -13,64 +13,87 @@
 #include "../../shared/utils/cstring.hpp"
 #include "../lexer/lexer.hpp"
 
-namespace shade
-{
-
+namespace shade {
     struct type_definition;
     struct function_definition;
 
     enum class ast_node_types {
-        binary_logic,
+        alloc,
+        array_alloc,
         assignment,
+        begin_precedence,
+        binary_logic,
+        break_statement,
         conditional,
         constant_reference,
         constant_value,
+        continue_statement,
+        empty,
+        end_precedence,
+        exit_statement,
         extern_c_function_call,
         extern_function_call,
+        free_statement,
         function_call,
         function_definition,
+        initializer_list,
+        length_of_statement,
         module_definition,
         operation,
         return_statement,
+        sizeof_statement,
+        string_subscript,
         structure_definition,
+        unknown,
         variable_definition,
         variable_reference,
-        break_statement,
-        exit_statement,
-        continue_statement,
-        initializer_list,
-        alloc,
-        array_alloc,
-        free_statement,
-        sizeof_statement,
-        length_of_statement,
-        begin_precedence,
-        end_precedence,
-        string_subscript,
-        unknown
     };
 
-    struct ast_node
-    {
-        ast_node * parent = nullptr;
-        ast_node_types type = ast_node_types::unknown;
-        std::vector<ast_node> children;
-        language_token * token = nullptr;
-        type_definition * related_type = nullptr;
-        type_expression * related_type_expression = nullptr;
-        function_definition * related_function_definition = nullptr;
-        cstring value;
-        bool is_unary_operation = false;
-        bool is_binary_node = false;
+    struct ast_node {
+        private:
+            std::shared_ptr<std::vector<ast_node> > children;
+            std::shared_ptr<std::vector<ast_node> > argument_nodes;
 
-        void create_child(ast_node_types type);
+        public:
+            ast_node *parent = nullptr;
+            ast_node_types type = ast_node_types::unknown;
+            language_token *token = nullptr;
+            type_definition *related_type = nullptr;
+            type_expression *related_type_expression = nullptr;
+            function_definition *related_function_definition = nullptr;
+            cstring value;
+            bool is_unary_operation = false;
+            bool is_binary_node = false;
 
-        void set_left_node(const ast_node &node);
-        void set_right_node(const ast_node &node);
+            bool has_arguments() const;
 
-        ast_node *get_left_node();
+            bool has_child_nodes() const;
 
-        ast_node *get_right_node();
+            void ensure_child_nodes();
+
+            void ensure_argument_nodes();
+
+            void set_left_node(const ast_node &node);
+
+            void set_right_node(const ast_node &node);
+
+            ast_node *get_left_node();
+
+            ast_node *get_right_node();
+
+            void append_child_nodes(const std::vector<ast_node> &nodes);
+
+            void add_child_node(const ast_node &node);
+
+            [[nodiscard]] ast_node &get_child_node(size_t index) const;
+
+            [[nodiscard]] size_t get_child_node_count() const;
+
+            void add_argument_node(const ast_node &node);
+
+            [[nodiscard]] ast_node &get_argument_node(size_t index) const;
+
+            [[nodiscard]] size_t get_argument_node_count() const;
     };
 } // shade
 

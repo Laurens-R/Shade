@@ -8,16 +8,9 @@
 #include "../ast/ast_node.hpp"
 #include "../compilecontext.hpp"
 #include "range_parser.hpp"
+#include "host_type.hpp"
 
 namespace shade {
-    enum class expression_parent_type {
-        module,
-        type,
-        function,
-        expression
-    };
-
-
     class expression_parser {
         private:
             static auto describe_operand(const ast_node &operand) -> cstring;
@@ -29,7 +22,7 @@ namespace shade {
             static variable_definition * find_variable(const cstring &name, module_definition *module, function_definition *function, compile_context &context);
             static function_definition * find_function(const cstring &name, module_definition *module, function_definition *function, compile_context &context);
         public:
-            static ast_node parse_expression(const std::vector<language_token> &tokens, size_t expression_from_index, size_t expression_to_index, expression_parent_type parent_type, void *parent, compile_context &context);
+            static ast_node parse_expression(const std::vector<language_token> &tokens, size_t expression_from_index, size_t expression_to_index, host_type parent_type, void *parent, compile_context &context);
 
     };
 }

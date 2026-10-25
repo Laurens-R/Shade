@@ -52,6 +52,10 @@ namespace shade {
 
             function_definition * find_function_by_relative_path(const cstring & path);
 
+            variable_definition *find_variable_by_absolute_path(const cstring & path);
+
+            variable_definition *find_variable_by_relative_path(const cstring & path);
+
             module_definition *add_child_module(const cstring &full_module_path);
 
             type_definition *add_child_type(const type_definition &type);

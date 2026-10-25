@@ -36,7 +36,7 @@ namespace shade
         cstring full_path;
         cstring parent_path;
 
-        ast_node* related_node = nullptr;
+        std::shared_ptr<std::vector<ast_node>> related_node;
         module_definition* related_module = nullptr;
         parsed_ranges * related_token_capture = nullptr;
         type_definition* related_type = nullptr;
@@ -49,7 +49,7 @@ namespace shade
 
         void add_variable(variable_definition &var);
         variable_definition *find_variable(const cstring &name);
-       
+
     };
 } // shade
 

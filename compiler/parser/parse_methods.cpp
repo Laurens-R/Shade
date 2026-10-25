@@ -84,6 +84,8 @@ namespace shade {
 
         function_arguments.capture_range(spelling::functions::begin_arguments, spelling::functions::end_arguments, range_keys::function_arguments);
 
+        sub_expressions.capture_range(spelling::groups::begin_group, spelling::groups::end_group, range_keys::statement_expression);
+
         are_parsers_initialized = true;
     }
 

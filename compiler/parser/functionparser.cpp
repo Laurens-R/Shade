@@ -3,6 +3,8 @@
 //
 
 #include "functionparser.hpp"
+
+#include "body_parser.hpp"
 #include "typeexpressionparser.hpp"
 #include "range_parser.hpp"
 #include "parser_range_keys.hpp"
@@ -113,7 +115,11 @@ namespace shade {
             func.has_return_type = true;
         }
 
-        //parse the body
+        if (ranges.contains_key(range_keys::function_body)) {
+            auto body_range = ranges.get_captured_range(range_keys::function_body).value();
+            auto body_nodes = body_parser::parse_body(ranges.child_results, tokens, context, host_type::function, &func);
+            func.related_node = std::make_shared<std::vector<ast_node>>(body_nodes);
+        }
 
         return true;
     }

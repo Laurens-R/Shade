@@ -183,6 +183,46 @@ namespace shade {
         return nullptr;
     }
 
+    variable_definition * module_definition::find_variable_by_absolute_path(const cstring &path) {
+        module_definition * found_module = this;
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
+
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_relative_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
+
+        auto variable_name = path_utils::get_object_from_path(path);
+
+        for (auto &variable : found_module->variables) {
+            if (variable.name == variable_name) {
+                return &variable;
+            }
+        }
+
+        return nullptr;
+    }
+
+    variable_definition * module_definition::find_variable_by_relative_path(const cstring &path) {
+        module_definition * found_module = this;
+
+        auto parent_namespace = path_utils::get_parent_namespace_from_path(path);
+        if (!parent_namespace.is_empty()) {
+            found_module = find_namespace_by_relative_path(parent_namespace);
+            if (found_module == nullptr) return nullptr;
+        }
+
+        auto variable_name = path_utils::get_object_from_path(path);
+
+        for (auto &variable : found_module->variables) {
+            if (variable.name == variable_name) {
+                return &variable;
+            }
+        }
+
+        return nullptr;
+    }
+
     module_definition *module_definition::add_child_module(const cstring &full_module_path) {
 
         auto module_path = path_utils::get_parent_namespace_from_path(full_module_path);

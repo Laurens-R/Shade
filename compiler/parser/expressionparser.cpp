@@ -210,9 +210,8 @@ namespace shade {
     }
 
     variable_definition * expression_parser::find_variable(const cstring & name, module_definition *module, function_definition *function, compile_context & context) {
-        //TODO: this needs to deal with relative paths.
         if (module) {
-            return module->find_variable(name);
+            return module->find_variable_by_relative_path(name);
         }
 
         if (function) {
@@ -221,12 +220,29 @@ namespace shade {
             if (!found_variable && function->is_method) {
                 auto parent_type = context.get_program_structure().get_type_definition(function->parent_path);
                 if (parent_type) {
-                    return parent_type->find_field(name);
+                    auto found_field = parent_type->find_field(name);
+                    if (found_field) {
+                        return found_field;
+                    } else {
+                        auto parent_module = context.get_program_structure().get_module_definition(function->parent_path);
+                        if (parent_module) {
+                            found_variable = parent_module->find_variable_by_relative_path(name);
+                            if (found_variable) {
+                                return found_variable;
+                            } else {
+                                return nullptr;
+                            }
+                        } else {
+                            return nullptr;
+                        }
+                    }
                 }
                 return nullptr;
             }
 
-            return found_variable;
+            if (found_variable) {
+                return found_variable;
+            }
         }
 
         return nullptr;
@@ -257,7 +273,7 @@ namespace shade {
         return nullptr;
     }
 
-    ast_node expression_parser::parse_expression(const std::vector<language_token> &tokens, const size_t expression_from_index, const size_t expression_to_index, expression_parent_type parent_type, void *parent, compile_context &context) {
+    ast_node expression_parser::parse_expression(const std::vector<language_token> &tokens, const size_t expression_from_index, const size_t expression_to_index, host_type parent_type, void *parent, compile_context &context) {
         ast_node result;
         std::vector<ast_node> flat_generated_nodes;
 
@@ -269,19 +285,19 @@ namespace shade {
         cstring parent_namespace;
 
         //check for the parent type. Expressions cannot be part of a type/struct defintion.
-        if (parent_type == expression_parent_type::function) {
+        if (parent_type == host_type::function) {
             parent_function = static_cast<function_definition *>(parent);
             parent_namespace = parent_function->full_path;
-        } else if (parent_type == expression_parent_type::module) {
+        } else if (parent_type == host_type::module) {
             parent_module = static_cast<module_definition *>(parent);
             parent_namespace = parent_module->full_path;
-        } else if (parent_type == expression_parent_type::type) {
+        } else if (parent_type == host_type::type) {
             context.log_error(tokens[expression_from_index].line, tokens[expression_from_index].column, "Statements are not allowed within a type definition: use a method instead.");
             return result;
         }
 
         //check if we are part of a sub expression and sub expression can't have assignments or variable defintions.
-        if (parent_type != expression_parent_type::expression) {
+        if (parent_type != host_type::expression) {
             //first scan for assignment symbols.
             std::vector<size_t> assignment_indices;
 
@@ -455,8 +471,8 @@ namespace shade {
                     while (current_argument_token_index <= to_argument_index) {
                         auto & current_argument_token = tokens[current_argument_token_index].text;
                         if (current_argument_token == spelling::functions::func_argument_seperator || current_argument_token == spelling::functions::end_arguments) {
-                            ast_node argument_node = parse_expression(tokens, from_argument_index, to_argument_index, expression_parent_type::expression, nullptr, context);
-                            node.children.push_back(argument_node);
+                            ast_node argument_node = parse_expression(tokens, from_argument_index, to_argument_index, host_type::expression, nullptr, context);
+                            node.add_argument_node(argument_node);
                             from_argument_index = current_argument_token_index + 1;
                         }
 
@@ -468,11 +484,33 @@ namespace shade {
                 current_token_index++;
                 continue;
             }
+
+            //we are beginning a sub argument
+            if (tokens[current_token_index].text == spelling::groups::begin_group) {
+                auto & sub_expression_parser = parse_methods::get_instance().sub_expressions;
+                auto sub_expression_result = sub_expression_parser.try_capture(tokens, current_token_index, last_token_index);
+
+                if (sub_expression_result.matched) {
+                    ast_node sub_expression_node = parse_expression(tokens, sub_expression_result.range_from_index, sub_expression_result.range_to_index, host_type::expression, nullptr, context);
+                    flat_generated_nodes.push_back(sub_expression_node);
+                    current_token_index = sub_expression_result.range_to_index  + 1;
+                    continue;
+                } else {
+                    context.log_error(tokens[current_token_index].line, tokens[current_token_index].column, "Could not parse sub expression.");
+                    return result;
+                }
+            }
+
+            context.log_error(tokens[current_token_index].line, tokens[current_token_index].column, "Could not parse expression. Unknown token found.");
+            return result;
         }
 
-        //after we've parsed the entire token scope for the expression, we apply shunting yard to it:
-        result = build_expression_tree(flat_generated_nodes, context);
-
+        if (!flat_generated_nodes.empty()) {
+            //after we've parsed the entire token scope for the expression, we apply shunting yard to it:
+            result = build_expression_tree(flat_generated_nodes, context);
+        } else {
+            result.type = ast_node_types::empty;
+        }
 
         return result;
     }
