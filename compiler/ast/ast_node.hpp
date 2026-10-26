@@ -14,8 +14,12 @@
 #include "../lexer/lexer.hpp"
 
 namespace shade {
+
     struct type_definition;
+
+#ifndef SHADE_FUNCTION_DEFINITION_DEFINED
     struct function_definition;
+#endif
 
     enum class ast_node_types {
         alloc,

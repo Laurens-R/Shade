@@ -70,6 +70,7 @@ namespace shade {
         if (symbol.is_binary_integer()) return spelling::types::unsigned_int_64;
         if (symbol.is_bool()) return spelling::types::boolean;
         if (symbol.is_float()) return spelling::types::float_64;
+        return cstring::empty();
     }
 
     bool symbol_utils::is_operator(const cstring &symbol) {

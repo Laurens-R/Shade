@@ -73,22 +73,31 @@ namespace shade {
 
             //first do a quick scan of the argument seperators, so we know how many arguments there are
             std::vector<size_t> found_argument_seperators;
+            size_t argument_count = 0;
+            size_t previous_seperator_index = arguments_range.from_token_index;
 
-            for (size_t argument_token_index = arguments_range.from_token_index; argument_token_index <= arguments_range.to_token_index; argument_token_index++) {
-                if (tokens[argument_token_index].text == spelling::functions::func_argument_seperator) {
-                    found_argument_seperators.push_back(argument_token_index);
+            if (arguments_range.to_token_index - arguments_range.from_token_index > 1) {
+                for (size_t argument_token_index = arguments_range.from_token_index; argument_token_index <= arguments_range.to_token_index; argument_token_index++) {
+                    if (tokens[argument_token_index].text == spelling::functions::func_argument_seperator) {
+                        if (argument_token_index == previous_seperator_index + 1) {
+                            context.log_error(tokens[argument_token_index].line, tokens[argument_token_index].column, "Found two argument seperators in a row.");
+                            return false;
+                        }
+
+                        found_argument_seperators.push_back(argument_token_index);
+                    }
                 }
-            }
 
-            size_t argument_count = found_argument_seperators.size() + 1;
+                argument_count = found_argument_seperators.size() + 1;
+            }
 
             for (size_t argument_index = 0; argument_index < argument_count; argument_index++) {
                 cstring current_token = cstring::empty();
                 cstring expected_end_token = argument_index == argument_count - 1 ? spelling::functions::end_arguments : spelling::functions::func_argument_seperator;
-                size_t argument_token_start_index = argument_index == 0 ? arguments_range.from_token_index : found_argument_seperators[argument_index - 1] + 1;
-                size_t argument_token_end_index = argument_index == argument_count - 1 ? arguments_range.to_token_index : (found_argument_seperators[argument_index] - 2); //-2 because if all is well, we would expect the symbol name of the argument at -1
+                size_t argument_token_start_index = argument_index == 0 ? arguments_range.from_token_index + 1 : found_argument_seperators[argument_index - 1] + 1;
+                size_t argument_token_end_index = argument_index == argument_count - 1 ? arguments_range.to_token_index - 1 : (found_argument_seperators[argument_index] - 1); //-2 because if all is well, we would expect the symbol name of the argument at -1
 
-                if (argument_token_end_index - argument_token_start_index < 1) {
+                if ((argument_token_end_index - argument_token_start_index) < 1) {
                     //too few tokens for a valid argument
                     context.log_error(tokens[argument_token_start_index].line, tokens[argument_token_start_index].column, "Invalid argument. Make sure it contains at least a valid type and a name.");
                     return false;
@@ -98,7 +107,7 @@ namespace shade {
                 if (argument_type_expression.has_value()) {
                     function_argument arg;
                     arg.type = argument_type_expression.value();
-                    arg.name = tokens[argument_token_end_index + 1].text;
+                    arg.name = tokens[argument_token_end_index].text;
                     func.arguments.push_back(arg);
                 } else {
                     context.log_error(tokens[argument_token_start_index].line, tokens[argument_token_start_index].column, "Invalid argument type. Could not determine the type for the argument.");

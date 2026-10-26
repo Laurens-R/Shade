@@ -51,6 +51,8 @@ namespace shade
         variable_definition *find_variable(const cstring &name);
 
     };
+
+#define SHADE_FUNCTION_DEFINITION_DEFINED 1
 } // shade
 
 #endif //SHADE_FUNCTION_H
